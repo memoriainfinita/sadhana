@@ -12,37 +12,77 @@ export class AudioRegistry {
     return count;
   }
 
-  track(cueId, audio) {
+  track(cueId, audio, baseVolume) {
+    const entry = { audio, baseVolume };
     if (!this.sources.has(cueId)) {
       this.sources.set(cueId, new Set());
     }
-    this.sources.get(cueId).add(audio);
-    audio.addEventListener?.('ended', () => this.untrack(cueId, audio), { once: true });
+    this.sources.get(cueId).add(entry);
+    audio.addEventListener?.('ended', () => this.untrack(cueId, entry), { once: true });
   }
 
-  untrack(cueId, audio) {
+  untrack(cueId, entry) {
     const group = this.sources.get(cueId);
     if (!group) return;
-    group.delete(audio);
+    group.delete(entry);
     if (group.size === 0) {
       this.sources.delete(cueId);
     }
   }
 
+  _rampVolume(audio, fromVolume, toVolume, durationMs) {
+    const startTime = performance.now();
+    const step = () => {
+      if (audio.paused) return;
+      const elapsed = performance.now() - startTime;
+      const progress = Math.min(1, elapsed / durationMs);
+      audio.volume = fromVolume + (toVolume - fromVolume) * progress;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
   playCue(cue, { volumeScale = 1, muted = false } = {}) {
     if (muted) return null;
     if (typeof Audio === 'undefined') return null;
+
     const audio = new Audio(`${this.basePath}${cue.sound}`);
-    audio.volume = Math.max(0, Math.min(1, (cue.volume / 100) * volumeScale));
-    this.track(cue.id, audio);
+    const targetVolume = Math.max(0, Math.min(1, (cue.volume / 100) * volumeScale));
+    const fadeIn = cue.fadeIn ?? 0;
+    const fadeOut = cue.fadeOut ?? 0;
+    const duration = cue.duration ?? 0;
+
+    audio.volume = fadeIn > 0 ? 0 : targetVolume;
+    this.track(cue.id, audio, cue.volume);
     audio.play?.().catch(() => {});
+
+    if (fadeIn > 0) {
+      this._rampVolume(audio, 0, targetVolume, fadeIn * 1000);
+    }
+
+    if (fadeOut > 0 && duration > fadeOut) {
+      window.setTimeout(() => {
+        if (!audio.paused) {
+          this._rampVolume(audio, audio.volume, 0, fadeOut * 1000);
+        }
+      }, (duration - fadeOut) * 1000);
+    }
+
     return audio;
+  }
+
+  applyMasterVolume(volumeScale, muted) {
+    this.sources.forEach((group) => {
+      group.forEach(({ audio, baseVolume }) => {
+        audio.volume = muted ? 0 : Math.max(0, Math.min(1, (baseVolume / 100) * volumeScale));
+      });
+    });
   }
 
   stopCue(cueId) {
     const group = this.sources.get(cueId);
     if (!group) return;
-    group.forEach((audio) => {
+    group.forEach(({ audio }) => {
       audio.pause();
       audio.currentTime = 0;
     });
@@ -51,7 +91,7 @@ export class AudioRegistry {
 
   stopAll() {
     this.sources.forEach((group) => {
-      group.forEach((audio) => {
+      group.forEach(({ audio }) => {
         audio.pause();
         audio.currentTime = 0;
       });

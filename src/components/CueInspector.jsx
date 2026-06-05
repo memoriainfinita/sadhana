@@ -1,7 +1,7 @@
-import { Copy, Play, Trash2 } from 'lucide-react';
+import { Copy, Play, Square, Trash2 } from 'lucide-react';
 import { SOUND_OPTIONS, formatClockTime } from '../domain/cues.js';
 
-export function CueInspector({ cue, onChange, onSavePreset, onPreview, onDuplicate, onDelete }) {
+export function CueInspector({ cue, onChange, onSavePreset, onPreview, onStopPreview, onDuplicate, onDelete }) {
   if (!cue) return null;
 
   return (
@@ -9,8 +9,8 @@ export function CueInspector({ cue, onChange, onSavePreset, onPreview, onDuplica
       <div className="inspector-header">
         <h2>Cue</h2>
         <div>
-          <button className="icon-button small" type="button" aria-label="Duplicar cue" onClick={onDuplicate}><Copy size={17} /></button>
-          <button className="icon-button small" type="button" aria-label="Eliminar cue" onClick={onDelete}><Trash2 size={17} /></button>
+          <button className="icon-button small" type="button" aria-label="Duplicar cue" title="Duplicar esta cue" onClick={onDuplicate}><Copy size={17} /></button>
+          <button className="icon-button small" type="button" aria-label="Eliminar cue" title="Eliminar esta cue" onClick={onDelete}><Trash2 size={17} /></button>
         </div>
       </div>
 
@@ -27,8 +27,11 @@ export function CueInspector({ cue, onChange, onSavePreset, onPreview, onDuplica
               <option key={sound.value} value={sound.value}>{sound.label}</option>
             ))}
           </select>
-          <button type="button" aria-label="Previsualizar sonido" onClick={() => onPreview(cue)}>
+          <button type="button" aria-label="Previsualizar sonido" title="Reproducir sonido de esta cue" onClick={() => onPreview(cue)}>
             <Play size={18} />
+          </button>
+          <button type="button" aria-label="Parar preview" title="Parar reproduccion del sonido" onClick={() => onStopPreview(cue)}>
+            <Square size={16} fill="currentColor" />
           </button>
         </div>
       </label>
@@ -59,7 +62,7 @@ export function CueInspector({ cue, onChange, onSavePreset, onPreview, onDuplica
 
       <div className="field-grid">
         <label>
-          Duración
+          Dur. (s)
           <input
             type="number"
             min="1"
@@ -69,7 +72,7 @@ export function CueInspector({ cue, onChange, onSavePreset, onPreview, onDuplica
           />
         </label>
         <label>
-          Entrada
+          Fade in (s)
           <input
             type="number"
             min="0"
@@ -79,7 +82,7 @@ export function CueInspector({ cue, onChange, onSavePreset, onPreview, onDuplica
           />
         </label>
         <label>
-          Salida
+          Fade out (s)
           <input
             type="number"
             min="0"
@@ -95,9 +98,6 @@ export function CueInspector({ cue, onChange, onSavePreset, onPreview, onDuplica
         <textarea value={cue.notes} onChange={(event) => onChange({ notes: event.target.value })} placeholder="Añade notas sobre este cue..." />
       </label>
 
-      <button className="save-preset" type="button" onClick={onSavePreset}>
-        Guardar preset
-      </button>
     </aside>
   );
 }
