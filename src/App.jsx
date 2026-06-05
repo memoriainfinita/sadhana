@@ -2,10 +2,10 @@ import { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { AppShell } from './components/AppShell.jsx';
 import { CueInspector } from './components/CueInspector.jsx';
 import { GlobalPanel } from './components/GlobalPanel.jsx';
-import { ModePanel } from './components/ModePanel.jsx';
 import { PresetLibrary } from './components/PresetLibrary.jsx';
 import { RecentSessions } from './components/RecentSessions.jsx';
 import { Timeline } from './components/Timeline.jsx';
+import { PlaybackBar } from './components/PlaybackBar.jsx';
 import { TimerPanel } from './components/TimerPanel.jsx';
 import { AudioRegistry } from './domain/audio.js';
 import {
@@ -21,9 +21,9 @@ import { createCueSchedulerState, getDueCues, resetCueScheduler } from './domain
 import { createSessionState, sessionReducer } from './domain/session.js';
 import {
   STORAGE_KEYS,
+  cleanStoredExamples,
   deletePreset,
   deleteSession,
-  readJson,
   savePreset,
   saveSession,
   writeJson,
@@ -39,20 +39,23 @@ function nowLabel() {
 }
 
 export function App() {
-  const [activeMode, setActiveMode] = useState('design');
+  const [activeMode, setActiveMode] = useState('practice');
   const [activePanel, setActivePanel] = useState(null);
   const [theme, setTheme] = useState('dim');
   const [cues, setCues] = useState(DEFAULT_CUES);
   const [selectedCueId, setSelectedCueId] = useState('forest');
-  const [presets, setPresets] = useState(() =>
-    readJson(window.localStorage, STORAGE_KEYS.presets, [])
-  );
-  const [sessions, setSessions] = useState(() =>
-    readJson(window.localStorage, STORAGE_KEYS.sessions, [])
-  );
+  const [initialStorage] = useState(() => cleanStoredExamples(window.localStorage));
+  const [presets, setPresets] = useState(() => initialStorage.presets);
+  const [sessions, setSessions] = useState(() => initialStorage.sessions);
+  const [loadedPreset, setLoadedPreset] = useState(null);
   const [notice, setNotice] = useState('');
   const [masterVolume, setMasterVolume] = useState(80);
   const [muted, setMuted] = useState(false);
+  const [accentColor, setAccentColor] = useState('#f6a133');
+  const [zenMode, setZenMode] = useState(false);
+  const [cuesVisible, setCuesVisible] = useState(true);
+  const [playingCueId, setPlayingCueId] = useState(null);
+  const [playingCueName, setPlayingCueName] = useState(null);
   const [session, dispatchSession] = useReducer(
     sessionReducer,
     createSessionState({ durationSeconds: SESSION_DURATION_SECONDS })
@@ -78,6 +81,20 @@ export function App() {
   }, [notice]);
 
   useEffect(() => {
+    audioRegistry.current.applyMasterVolume(masterVolume / 100, muted);
+  }, [masterVolume, muted]);
+
+  useEffect(() => {
+    const r = parseInt(accentColor.slice(1, 3), 16);
+    const g = parseInt(accentColor.slice(3, 5), 16);
+    const b = parseInt(accentColor.slice(5, 7), 16);
+    const l = (v) => Math.round(v + (255 - v) * 0.28).toString(16).padStart(2, '0');
+    const accent2 = `#${l(r)}${l(g)}${l(b)}`;
+    document.documentElement.style.setProperty('--accent', accentColor);
+    document.documentElement.style.setProperty('--accent-2', accent2);
+  }, [accentColor]);
+
+  useEffect(() => {
     if (session.status !== 'running') return;
     const result = getDueCues(cues, schedulerState.current, session.elapsedSeconds);
     schedulerState.current = result.state;
@@ -89,6 +106,9 @@ export function App() {
       if (audio && cue.duration > 0) {
         window.setTimeout(() => audioRegistry.current.stopCue(cue.id), cue.duration * 1000);
       }
+      setPlayingCueId(cue.id);
+      setPlayingCueName(cue.name);
+      window.setTimeout(() => setPlayingCueName(null), 3000);
     });
   }, [cues, masterVolume, muted, session.elapsedSeconds, session.status]);
 
@@ -122,14 +142,17 @@ export function App() {
     setCuesWithHistory((current) => updateCue(current, selectedCueId, normalizedUpdates));
   }
 
-  function handleSavePreset() {
+  function handleSavePreset(name) {
+    const id = loadedPreset?.id ?? crypto.randomUUID();
+    const presetName = name ?? loadedPreset?.name ?? 'Preset Sadhana';
     const next = savePreset(window.localStorage, {
-      id: crypto.randomUUID(),
-      name: selectedCue?.name ?? 'Preset Sadhana',
+      id,
+      name: presetName,
       createdAt: new Date().toISOString(),
       cues,
     });
     setPresets(next);
+    setLoadedPreset({ id, name: presetName });
     setNotice('Preset guardado');
   }
 
@@ -175,7 +198,8 @@ export function App() {
     if (!preset.cues?.length) return;
     setCuesWithHistory(preset.cues);
     setSelectedCueId(preset.cues[0].id);
-    setActiveMode('design');
+    setLoadedPreset({ id: preset.id, name: preset.name });
+    setActiveMode('practice');
     setNotice(`Preset cargado: ${preset.name}`);
   }
 
@@ -190,8 +214,13 @@ export function App() {
   }
 
   function handleRepeatSession(item) {
+    const minutes = parseInt(item.duration, 10);
+    if (minutes > 0) {
+      dispatchSession({ type: 'stop' });
+      dispatchSession({ type: 'setDuration', durationSeconds: minutes * 60 });
+    }
     setActiveMode('practice');
-    setNotice(`Lista para repetir: ${item.name}`);
+    setNotice(`Repetir: ${item.name}`);
   }
 
   function handleDurationChange(minutes) {
@@ -221,23 +250,46 @@ export function App() {
     }
   }
 
-  const timerPanel = (
-    <TimerPanel
-      session={session}
-      onStart={() => {
-        schedulerState.current = resetCueScheduler();
-        dispatchSession({ type: 'start', now: Date.now() });
-      }}
-      onPause={() => dispatchSession({ type: 'pause', now: Date.now() })}
-      onResume={() => dispatchSession({ type: 'resume', now: Date.now() })}
-      onStop={() => {
-        dispatchSession({ type: 'stop' });
-        audioRegistry.current.stopAll();
-        schedulerState.current = resetCueScheduler();
-      }}
-      onNudge={handleNudge}
-    />
-  );
+  function handleTriggerCue(cue) {
+    setSelectedCueId(cue.id);
+    audioRegistry.current.playCue(cue, { volumeScale: masterVolume / 100, muted });
+  }
+
+  function handleSeek(seconds) {
+    dispatchSession({ type: 'nudge', seconds: seconds - session.elapsedSeconds });
+  }
+
+  function handleMoveCue(cueId, time) {
+    const clampedTime = clampCueTime(time, session.durationSeconds);
+    setCuesWithHistory((current) => updateCue(current, cueId, { time: clampedTime }));
+  }
+
+  const timerPanelProps = {
+    session,
+    onStart() {
+      schedulerState.current = resetCueScheduler();
+      dispatchSession({ type: 'start', now: Date.now() });
+    },
+    onPause() { dispatchSession({ type: 'pause', now: Date.now() }); },
+    onResume() { dispatchSession({ type: 'resume', now: Date.now() }); },
+    onStop() {
+      if (session.elapsedSeconds >= 60) {
+        const next = saveSession(window.localStorage, {
+          id: crypto.randomUUID(),
+          name: selectedCue?.name ? `Sesion con ${selectedCue.name}` : 'Sesion completada',
+          duration: `${Math.round(session.elapsedSeconds / 60)} min`,
+          when: `Hoy, ${nowLabel()}`,
+          color: selectedCue?.color ?? '#f6a133',
+        });
+        setSessions(next);
+        setNotice('Sesion guardada en Recordar');
+      }
+      dispatchSession({ type: 'stop' });
+      audioRegistry.current.stopAll();
+      schedulerState.current = resetCueScheduler();
+    },
+    onNudge: handleNudge,
+  };
 
   const timelinePanel = (
     <Timeline
@@ -246,9 +298,12 @@ export function App() {
       durationSeconds={session.durationSeconds}
       elapsedSeconds={session.elapsedSeconds}
       onSelectCue={setSelectedCueId}
+      onMoveCue={handleMoveCue}
+      onSeek={handleSeek}
       onAddCue={handleAddCue}
       onUndo={handleUndoCueChange}
       canUndo={cueHistory.current.length > 0}
+      onDurationChange={handleDurationChange}
     />
   );
 
@@ -261,6 +316,7 @@ export function App() {
         volumeScale: masterVolume / 100,
         muted,
       })}
+      onStopPreview={(cue) => audioRegistry.current.stopCue(cue.id)}
       onDuplicate={handleDuplicateCue}
       onDelete={handleDeleteCue}
     />
@@ -294,10 +350,10 @@ export function App() {
       <GlobalPanel
         activePanel={activePanel}
         onClose={() => setActivePanel(null)}
-        durationMinutes={Math.round(session.durationSeconds / 60)}
-        onDurationChange={handleDurationChange}
         theme={theme}
         onThemeToggle={() => setTheme((current) => (current === 'dim' ? 'contrast' : 'dim'))}
+        accentColor={accentColor}
+        onAccentColorChange={setAccentColor}
         masterVolume={masterVolume}
         onMasterVolumeChange={setMasterVolume}
         muted={muted}
@@ -306,42 +362,58 @@ export function App() {
         onExportData={handleExportData}
         onImportData={handleImportData}
       />
-      <main className={`workspace mode-${activeMode} theme-${theme}`}>
-        <ModePanel
-          activeMode={activeMode}
-          cueCount={cues.length}
-          presetCount={presets.length}
-          sessionCount={sessions.length}
-          onModeChange={setActiveMode}
-        />
 
+      {zenMode && (
+        <div className="zen-overlay">
+          <TimerPanel {...timerPanelProps} onZen={() => setZenMode(false)} zenMode playingCueName={playingCueName} />
+        </div>
+      )}
+
+      <main className={`workspace mode-${activeMode} theme-${theme}`}>
         {activeMode === 'practice' && (
           <section className="practice-workspace">
-            {timerPanel}
-            <section className="practice-cues" aria-label="Cues activas">
-              <div className="recent-header">
-                <h2>Cues activas</h2>
-                <button type="button" onClick={() => setActiveMode('design')}>Editar</button>
-              </div>
-              <div className="practice-cue-list">
-                {cues.map((cue) => (
-                  <button
-                    key={cue.id}
-                    type="button"
-                    className={cue.id === selectedCueId ? 'practice-cue active' : 'practice-cue'}
-                    onClick={() => setSelectedCueId(cue.id)}
-                  >
-                    <span>{cue.name}</span>
-                    <strong>{Math.floor(cue.time / 60)}:{String(cue.time % 60).padStart(2, '0')}</strong>
-                  </button>
-                ))}
-              </div>
-            </section>
+            <TimerPanel
+              {...timerPanelProps}
+              onZen={() => setZenMode(true)}
+              presetName={loadedPreset?.name}
+              playingCueName={playingCueName}
+              cues={cues}
+              playingCueId={playingCueId}
+              cuesVisible={cuesVisible}
+              onToggleCues={() => setCuesVisible((v) => !v)}
+              onEditCues={() => setActiveMode('design')}
+            />
           </section>
         )}
 
         {activeMode === 'design' && (
           <section className="design-workspace">
+            <div className="preset-name-bar">
+              <input
+                className="preset-name-input"
+                type="text"
+                placeholder="Nombre del preset"
+                value={loadedPreset?.name ?? ''}
+                onChange={(e) => setLoadedPreset((p) => ({ id: p?.id ?? null, name: e.target.value }))}
+                aria-label="Nombre del preset"
+              />
+              <button
+                type="button"
+                className="preset-name-save"
+                title="Guardar preset con las cues actuales"
+                onClick={() => handleSavePreset(loadedPreset?.name)}
+              >
+                Guardar preset
+              </button>
+            </div>
+            <PlaybackBar
+              session={session}
+              onStart={timerPanelProps.onStart}
+              onPause={timerPanelProps.onPause}
+              onResume={timerPanelProps.onResume}
+              onStop={timerPanelProps.onStop}
+              onNudge={handleNudge}
+            />
             {timelinePanel}
             {cueInspector}
           </section>

@@ -1,10 +1,8 @@
-import { Bell, MoreHorizontal, TreePine, Waves } from 'lucide-react';
+import { Bell, MoreHorizontal, Waves } from 'lucide-react';
 
 const fallbackSessions = [
-  { id: 'morning', name: 'Mañana tranquila', duration: '24 min', when: 'Hoy, 07:12', icon: Bell, color: '#f6a133', sample: true },
-  { id: 'walk', name: 'Paseo consciente', duration: '18 min', when: 'Ayer, 19:30', icon: TreePine, color: '#9bb56f', sample: true },
-  { id: 'deep', name: 'Relajación profunda', duration: '30 min', when: 'Ayer, 07:45', icon: Waves, color: '#b886d0', sample: true },
-  { id: 'breath', name: 'Respiración', duration: '12 min', when: 'Anteayer, 21:10', icon: Bell, color: '#f6a133', sample: true },
+  { id: 'sample-complete-session', name: 'Secuencia completa', duration: '24 min', when: 'Hoy, 07:12', icon: Bell, color: '#f6a133', sample: true },
+  { id: 'sample-short-session', name: 'Sesion breve', duration: '12 min', when: 'Ayer, 21:10', icon: Waves, color: '#6fa7c4', sample: true },
 ];
 
 export function RecentSessions({ sessions = [], onViewAll, onRepeatSession, onDeleteSession }) {
@@ -12,7 +10,7 @@ export function RecentSessions({ sessions = [], onViewAll, onRepeatSession, onDe
 
   return (
     <section className="recent-panel" aria-label="Ultimas sesiones">
-      <div className="recent-header">
+      <div className="section-header">
         <h2>Ultimas sesiones</h2>
         <button type="button" onClick={onViewAll}>Ver todo</button>
       </div>
@@ -27,12 +25,12 @@ export function RecentSessions({ sessions = [], onViewAll, onRepeatSession, onDe
                 <p>{item.duration} <span>•</span> {item.when}</p>
               </div>
               <div className="recent-actions" aria-label={`Opciones de ${item.name}`}>
-                <button type="button" onClick={() => onRepeatSession?.(item)} aria-label={`Repetir ${item.name}`}>
+                <button type="button" onClick={() => onRepeatSession?.(item)} aria-label={`Repetir ${item.name}`} title={`Ir a Practicar con la sesion: ${item.name}`}>
                   <MoreHorizontal size={16} />
                   Repetir
                 </button>
                 {!item.sample && (
-                  <button type="button" onClick={() => onDeleteSession?.(item.id)} aria-label={`Eliminar ${item.name}`}>
+                  <button type="button" onClick={() => onDeleteSession?.(item.id)} aria-label={`Eliminar ${item.name}`} title={`Eliminar sesion: ${item.name}`}>
                     Eliminar
                   </button>
                 )}

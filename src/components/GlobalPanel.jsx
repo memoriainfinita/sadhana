@@ -1,10 +1,19 @@
+const ACCENT_PRESETS = [
+  { label: 'Ambar', value: '#f6a133' },
+  { label: 'Oro', value: '#e8c547' },
+  { label: 'Salvia', value: '#7eb87a' },
+  { label: 'Cian', value: '#4db8b5' },
+  { label: 'Rosa', value: '#e07070' },
+  { label: 'Lila', value: '#9b8bc8' },
+];
+
 export function GlobalPanel({
   activePanel,
   onClose,
-  durationMinutes,
-  onDurationChange,
   theme,
   onThemeToggle,
+  accentColor,
+  onAccentColorChange,
   masterVolume,
   onMasterVolumeChange,
   muted,
@@ -19,31 +28,39 @@ export function GlobalPanel({
     <aside className="global-panel" aria-label="Panel global">
       <div className="global-panel-header">
         <span>Panel</span>
-        <button type="button" onClick={onClose}>Cerrar</button>
+        <button type="button" title="Cerrar panel" onClick={onClose}>Cerrar</button>
       </div>
-      {activePanel === 'practice' && (
-        <>
-          <h2>Ajustes de practica</h2>
-          <label>
-            Duracion
-            <input
-              type="number"
-              min="1"
-              max="180"
-              value={durationMinutes}
-              onChange={(event) => onDurationChange(Number(event.target.value))}
-            />
-            <span>min</span>
-          </label>
-        </>
-      )}
 
       {activePanel === 'theme' && (
         <>
           <h2>Tema</h2>
-          <button type="button" onClick={onThemeToggle}>
+          <button type="button" title="Cambiar entre tema sobrio y alto contraste" onClick={onThemeToggle}>
             {theme === 'dim' ? 'Usar contraste alto' : 'Usar tema sobrio'}
           </button>
+          <label>
+            Color de acento
+            <div className="accent-presets">
+              {ACCENT_PRESETS.map((preset) => (
+                <button
+                  key={preset.value}
+                  type="button"
+                  className={`accent-swatch${accentColor === preset.value ? ' active' : ''}`}
+                  style={{ background: preset.value }}
+                  aria-label={preset.label}
+                  title={preset.label}
+                  onClick={() => onAccentColorChange(preset.value)}
+                />
+              ))}
+              <input
+                type="color"
+                value={accentColor}
+                onChange={(e) => onAccentColorChange(e.target.value)}
+                aria-label="Color personalizado"
+                title="Color personalizado"
+                className="accent-color-input"
+              />
+            </div>
+          </label>
         </>
       )}
 
@@ -65,14 +82,14 @@ export function GlobalPanel({
             <input type="checkbox" checked={muted} onChange={(event) => onMutedChange(event.target.checked)} />
             Silenciar
           </label>
-          <button type="button" onClick={onStopAudio}>Detener audio</button>
+          <button type="button" title="Detener todo el audio en reproduccion ahora mismo" onClick={onStopAudio}>Detener audio</button>
         </>
       )}
 
       {activePanel === 'settings' && (
         <>
           <h2>Configuracion</h2>
-          <button type="button" onClick={onExportData}>Exportar datos</button>
+          <button type="button" title="Copiar presets y sesiones al portapapeles como JSON" onClick={onExportData}>Exportar datos</button>
           <textarea
             placeholder="Pega aqui un JSON exportado"
             onBlur={(event) => {
