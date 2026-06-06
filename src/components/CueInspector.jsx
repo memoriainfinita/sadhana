@@ -1,7 +1,7 @@
 import { Copy, Play, Square, Trash2 } from 'lucide-react';
-import { SOUND_OPTIONS, formatClockTime } from '../domain/cues.js';
+import { SOUND_OPTION_GROUPS, formatClockTime } from '../domain/cues.js';
 
-export function CueInspector({ cue, onChange, onSavePreset, onPreview, onStopPreview, onDuplicate, onDelete }) {
+export function CueInspector({ cue, onChange, onPreview, onStopPreview, onDuplicate, onDelete }) {
   if (!cue) return null;
 
   return (
@@ -23,8 +23,12 @@ export function CueInspector({ cue, onChange, onSavePreset, onPreview, onStopPre
         Sonido
         <div className="select-row">
           <select value={cue.sound} onChange={(event) => onChange({ sound: event.target.value })}>
-            {SOUND_OPTIONS.map((sound) => (
-              <option key={sound.value} value={sound.value}>{sound.label}</option>
+            {SOUND_OPTION_GROUPS.map((group) => (
+              <optgroup key={group.group} label={group.group}>
+                {group.options.map((sound) => (
+                  <option key={sound.value} value={sound.value}>{sound.label}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
           <button type="button" aria-label="Previsualizar sonido" title="Reproducir sonido de esta cue" onClick={() => onPreview(cue)}>

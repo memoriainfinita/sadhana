@@ -311,7 +311,6 @@ export function App() {
     <CueInspector
       cue={selectedCue}
       onChange={updateSelectedCue}
-      onSavePreset={handleSavePreset}
       onPreview={(cue) => audioRegistry.current.playCue(cue, {
         volumeScale: masterVolume / 100,
         muted,

@@ -3,6 +3,26 @@ export const STORAGE_KEYS = {
   sessions: 'sadhana-next.sessions',
 };
 
+const OLD_SAMPLE_IDS = new Set([
+  'sample-ritual',
+  'sample-breath',
+  'morning',
+  'deep',
+  'walk',
+  'breath',
+]);
+
+const OLD_SAMPLE_NAMES = new Set([
+  'Ritual base',
+  'Respiracion corta',
+  'Bosque suave',
+  'Bosque prueba browser',
+  'Mañana tranquila',
+  'Relajación profunda',
+  'Paseo consciente',
+  'Respiración',
+]);
+
 export function readJson(storage, key, fallback) {
   try {
     const raw = storage.getItem(key);
@@ -41,4 +61,18 @@ export function deleteSession(storage, sessionId) {
   const next = readJson(storage, STORAGE_KEYS.sessions, []).filter((session) => session.id !== sessionId);
   writeJson(storage, STORAGE_KEYS.sessions, next);
   return next;
+}
+
+function isOldSample(item) {
+  return OLD_SAMPLE_IDS.has(item?.id) || OLD_SAMPLE_NAMES.has(item?.name);
+}
+
+export function cleanStoredExamples(storage) {
+  const presets = readJson(storage, STORAGE_KEYS.presets, []).filter((preset) => !isOldSample(preset));
+  const sessions = readJson(storage, STORAGE_KEYS.sessions, []).filter((session) => !isOldSample(session));
+
+  writeJson(storage, STORAGE_KEYS.presets, presets);
+  writeJson(storage, STORAGE_KEYS.sessions, sessions);
+
+  return { presets, sessions };
 }
