@@ -1,6 +1,7 @@
 export const STORAGE_KEYS = {
   presets: 'sadhana-next.presets',
   sessions: 'sadhana-next.sessions',
+  showSoundNames: 'sadhana-next.showSoundNames',
 };
 
 const OLD_SAMPLE_IDS = new Set([
