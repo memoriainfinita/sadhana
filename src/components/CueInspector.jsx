@@ -41,6 +41,26 @@ export function CueInspector({ cue, onChange, onPreview, onStopPreview, onDuplic
       </label>
 
       <label>
+        Instruccion
+        <input
+          value={cue.instruction ?? ''}
+          onChange={(event) => onChange({ instruction: event.target.value })}
+          placeholder="ej. Inhala, Reten, Exhala..."
+        />
+      </label>
+
+      <label>
+        Visibilidad (s)
+        <input
+          type="number"
+          min="1"
+          max="60"
+          value={cue.instructionDuration ?? 5}
+          onChange={(event) => onChange({ instructionDuration: Number(event.target.value) })}
+        />
+      </label>
+
+      <label>
         Tiempo
         <input
           type="range"
