@@ -21,6 +21,8 @@ export function GlobalPanel({
   onStopAudio,
   onExportData,
   onImportData,
+  showSoundNames,
+  onShowSoundNamesChange,
 }) {
   if (!activePanel) return null;
 
@@ -89,6 +91,14 @@ export function GlobalPanel({
       {activePanel === 'settings' && (
         <>
           <h2>Configuracion</h2>
+          <label className="check-row">
+            <input
+              type="checkbox"
+              checked={showSoundNames}
+              onChange={(event) => onShowSoundNamesChange(event.target.checked)}
+            />
+            Mostrar nombre del sonido al dispararse
+          </label>
           <button type="button" title="Copiar presets y sesiones al portapapeles como JSON" onClick={onExportData}>Exportar datos</button>
           <textarea
             placeholder="Pega aqui un JSON exportado"
