@@ -1,6 +1,6 @@
 ---
 created: 2026-05-09
-last_updated: 2026-06-05
+last_updated: 2026-06-06
 ---
 
 # Sadhana State
@@ -13,7 +13,7 @@ last_updated: 2026-06-05
 
 ## Services
 
-- Dev server: `pnpm dev` en `http://localhost:5173/`. Parado al cierre de sesion 2026-06-05.
+- Dev server: `pnpm dev` en `http://localhost:5173/`. Parado al cierre de sesion 2026-06-06.
 
 ## Preferences
 
@@ -35,17 +35,21 @@ last_updated: 2026-06-05
 - 2026-06-05: Audio: volumen maestro y mute ahora afectan audio en reproduccion (applyMasterVolume), fades in/out implementados con rAF, color de acento seleccionable desde panel Tema.
 - 2026-06-05: Flujos: cargar preset va a Practicar, repetir sesion restaura duracion, sesiones se guardan tambien al detener manualmente (>60s), tooltips en todos los botones.
 - 2026-06-05: Layout Practicar: cues integradas dentro del TimerPanel debajo del boton Detener, lista compacta pasiva, panel centrado columna unica.
+- 2026-06-06: Batida de codigo muerto: ModePanel.jsx eliminado (huerfano), prop onSavePreset eliminada de CueInspector, bug en OLD_SAMPLE_NAMES corregido ('Nueva cue'/'Nueva cue copia' ya no filtran presets legítimos).
+- 2026-06-06: Tests: arreglados 2 tests incorrectos (scheduler arg fantasma, cobertura de sonidos), añadidos 4 tests nuevos (clampCueTime, savePreset, saveSession, regresion cleanStoredExamples). Total: 24 tests verdes.
+- 2026-06-06: Registro completo de audios: plugin Vite `virtual:audio-manifest` autodescubre `public/audio/**/*.mp3` al arrancar. SOUND_OPTIONS y SOUND_OPTION_GROUPS generados dinamicamente desde `src/domain/sounds.js`. CueInspector usa `<optgroup>` por categoria. Renombrado `bells/3 chime-meditation.mp3` → `bells/chime-meditation.mp3`. 51 archivos registrados.
+- 2026-06-06: Disenado y planificado campo `instruction` en cues. Spec: `docs/superpowers/specs/2026-06-06-instruction-field-design.md`. Plan: `docs/superpowers/plans/2026-06-06-instruction-field.md`. Pendiente de implementar.
 
 ## TODO
 
+- [ ] Campo `instruction` en cues — DISENADO, plan listo en `docs/superpowers/plans/2026-06-06-instruction-field.md`. Proxima sesion: ejecutar plan (7 tareas, TDD).
 - [ ] Refinar scheduling de audio: precision, fades reales, replay correcto al rebobinar y mezcla de clips largos.
 - [ ] i18n: contexto `LanguageContext` + hook `useT()` + objetos `es.js`/`en.js` en `src/i18n/`, toggle en Settings. Afecta todos los componentes.
-- [ ] Batida de codigo muerto y features a medio implementar: clases/funciones sin uso, props que no llegan a ningún sitio, CSS huerfano, logica de scheduler sin conectar, etc.
-- [ ] Registrar todos los audios en `SOUND_OPTIONS` (cues.js): actualmente solo 6 de 51 archivos estan incluidos. Faltan bells (12), fx (11) y ambient (23+). Añadir con etiquetas en español y agrupar por categoria en el selector.
-- [ ] Campo `instruction` en todas las cues: texto corto opcional (ej. "Inhala", "Retén", "Exhala") que se muestra cerca del temporizador cuando la cue se dispara, con su propio tiempo de visibilidad. Añadir campo en el inspector, mostrar en el timer (diferenciado del nombre del sonido). Util para pranayama, guias de movimiento, recordatorios de postura, etc. Construir sobre el sistema `playingCueName` existente.
 - [ ] Accesos de teclado basicos: espacio para play/pause, escape para salir del zen, flechas para nudge ±15s, quizas 1/2/3 para cambiar de modo.
 - [ ] Crear presets basicos de ejemplo que se incluyan por defecto en la app (no como fallback de muestra sino como contenido real): sesiones de meditacion, respiracion, movimiento, etc. con cues, tiempos y audios bien configurados.
 - [ ] Timeline track clips redimensionables: arrastrar el borde derecho del clip para cambiar `duration` de la cue, al estilo DAW.
 - [ ] Handles de fade en los clips del timeline: esquina superior izquierda para fade in, esquina superior derecha para fade out — arrastrar horizontalmente cambia `fadeIn`/`fadeOut`, con indicador visual de la rampa, al estilo Reaper.
+- [x] Batida de codigo muerto y features a medio implementar.
+- [x] Registrar todos los audios en SOUND_OPTIONS.
 - [x] Persistir presets y sesiones de forma exportable/importable.
 - [x] Decidir si `sadhana-next` se convierte en repo Git propio o si se inicializa Git en la raiz del proyecto.

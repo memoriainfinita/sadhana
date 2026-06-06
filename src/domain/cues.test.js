@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import {
   DEFAULT_CUES,
+  SOUND_OPTIONS,
+  clampCueTime,
   createCue,
   duplicateCue,
   formatClockTime,
@@ -35,6 +37,20 @@ describe('cues domain', () => {
     expect(getCueById(next, 'start')).toEqual(getCueById(DEFAULT_CUES, 'start'));
   });
 
+  test('default cues only reference sounds registered in SOUND_OPTIONS', () => {
+    const registered = new Set(SOUND_OPTIONS.map((s) => s.value));
+    DEFAULT_CUES.forEach((cue) => {
+      expect(registered.has(cue.sound), `sound not registered: ${cue.sound}`).toBe(true);
+    });
+  });
+
+  test('clamps cue time within session bounds', () => {
+    expect(clampCueTime(0, 1440)).toBe(0);
+    expect(clampCueTime(1440, 1440)).toBe(1440);
+    expect(clampCueTime(2000, 1440)).toBe(1440);
+    expect(clampCueTime(-10, 1440)).toBe(0);
+  });
+
   test('creates a cue clamped inside the session duration', () => {
     const cue = createCue({ atTime: 2000, durationSeconds: 1440 });
 
@@ -55,20 +71,20 @@ describe('cues domain', () => {
   });
 
   test('duplicates a cue with a readable name and offset time', () => {
-    const copy = duplicateCue(DEFAULT_CUES[1], { durationSeconds: 1440 });
+    const copy = duplicateCue(DEFAULT_CUES[2], { durationSeconds: 1440 });
 
     expect(copy).toMatchObject({
       name: 'Bosque suave copia',
-      sound: DEFAULT_CUES[1].sound,
+      sound: DEFAULT_CUES[2].sound,
       time: 510,
     });
-    expect(copy.id).not.toBe(DEFAULT_CUES[1].id);
+    expect(copy.id).not.toBe(DEFAULT_CUES[2].id);
   });
 
   test('removes a cue and chooses a nearby selection', () => {
     const result = removeCue(DEFAULT_CUES, 'forest');
 
-    expect(result.cues.map((cue) => cue.id)).toEqual(['start', 'final']);
-    expect(result.selectedCueId).toBe('final');
+    expect(result.cues.map((cue) => cue.id)).toEqual(['start', 'rain', 'breath', 'gong', 'final']);
+    expect(result.selectedCueId).toBe('breath');
   });
 });

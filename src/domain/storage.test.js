@@ -1,5 +1,13 @@
 import { describe, expect, test } from 'vitest';
-import { deletePreset, deleteSession, readJson, writeJson } from './storage.js';
+import {
+  cleanStoredExamples,
+  deletePreset,
+  deleteSession,
+  readJson,
+  savePreset,
+  saveSession,
+  writeJson,
+} from './storage.js';
 
 function memoryStorage(initial = {}) {
   const items = new Map(Object.entries(initial));
@@ -49,5 +57,60 @@ describe('storage domain', () => {
     const next = deleteSession(storage, 'b');
 
     expect(next).toEqual([{ id: 'a' }]);
+  });
+
+  test('savePreset prepends, deduplicates by id, and caps at 12', () => {
+    const storage = memoryStorage();
+    const existing = Array.from({ length: 12 }, (_, i) => ({ id: `p${i}`, name: `Preset ${i}` }));
+    existing.forEach((p) => savePreset(storage, p));
+
+    const updated = savePreset(storage, { id: 'p0', name: 'Preset 0 editado' });
+
+    expect(updated[0]).toMatchObject({ id: 'p0', name: 'Preset 0 editado' });
+    expect(updated.length).toBe(12);
+    expect(updated.filter((p) => p.id === 'p0').length).toBe(1);
+  });
+
+  test('saveSession prepends and caps at 8', () => {
+    const storage = memoryStorage();
+    Array.from({ length: 8 }, (_, i) => saveSession(storage, { id: `s${i}`, name: `Sesion ${i}` }));
+
+    const next = saveSession(storage, { id: 'new', name: 'Nueva sesion' });
+
+    expect(next[0]).toMatchObject({ id: 'new' });
+    expect(next.length).toBe(8);
+  });
+
+  test('cleanStoredExamples preserves presets with default cue names', () => {
+    const storage = memoryStorage({
+      'sadhana-next.presets': JSON.stringify([
+        { id: 'user-preset', name: 'Nueva cue' },
+        { id: 'user-preset-2', name: 'Nueva cue copia' },
+      ]),
+      'sadhana-next.sessions': JSON.stringify([]),
+    });
+
+    const result = cleanStoredExamples(storage);
+
+    expect(result.presets).toHaveLength(2);
+  });
+
+  test('cleans old sample presets and sessions from storage', () => {
+    const storage = memoryStorage({
+      'sadhana-next.presets': JSON.stringify([
+        { id: 'sample-ritual', name: 'Ritual base' },
+        { id: 'manual', name: 'Trabajo real' },
+        { id: 'old', name: 'Bosque prueba browser' },
+      ]),
+      'sadhana-next.sessions': JSON.stringify([
+        { id: 'morning', name: 'Mañana tranquila' },
+        { id: 'real-session', name: 'Sesion guardada' },
+      ]),
+    });
+
+    const result = cleanStoredExamples(storage);
+
+    expect(result.presets).toEqual([{ id: 'manual', name: 'Trabajo real' }]);
+    expect(result.sessions).toEqual([{ id: 'real-session', name: 'Sesion guardada' }]);
   });
 });

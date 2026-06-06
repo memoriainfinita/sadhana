@@ -23,9 +23,7 @@ describe('cue scheduler domain', () => {
     expect(getDueCues(cues, result.state, 25).due).toEqual([]);
   });
 
-  test('resetCueScheduler clears played cue ids', () => {
-    const state = createCueSchedulerState(['start']);
-
-    expect(resetCueScheduler(state)).toEqual(createCueSchedulerState());
+  test('resetCueScheduler returns an empty scheduler state', () => {
+    expect(resetCueScheduler()).toEqual(createCueSchedulerState());
   });
 });
