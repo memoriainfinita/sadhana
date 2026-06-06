@@ -87,4 +87,23 @@ describe('cues domain', () => {
     expect(result.cues.map((cue) => cue.id)).toEqual(['start', 'rain', 'breath', 'gong', 'final']);
     expect(result.selectedCueId).toBe('breath');
   });
+
+  test('createCue includes instruction fields with empty defaults', () => {
+    const cue = createCue({ atTime: 0, durationSeconds: 1440 });
+    expect(cue.instruction).toBe('');
+    expect(cue.instructionDuration).toBe(5);
+  });
+
+  test('duplicateCue preserves instruction fields', () => {
+    const source = { ...DEFAULT_CUES[0], instruction: 'Inhala', instructionDuration: 8 };
+    const copy = duplicateCue(source, { durationSeconds: 1440 });
+    expect(copy.instruction).toBe('Inhala');
+    expect(copy.instructionDuration).toBe(8);
+  });
+
+  test('updateCue can update instruction fields independently', () => {
+    const cues = updateCue(DEFAULT_CUES, 'start', { instruction: 'Exhala', instructionDuration: 6 });
+    expect(getCueById(cues, 'start')).toMatchObject({ instruction: 'Exhala', instructionDuration: 6 });
+    expect(getCueById(cues, 'rain')).not.toHaveProperty('instruction', 'Exhala');
+  });
 });
