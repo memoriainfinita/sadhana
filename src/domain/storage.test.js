@@ -6,6 +6,7 @@ import {
   readJson,
   savePreset,
   saveSession,
+  STORAGE_KEYS,
   writeJson,
 } from './storage.js';
 
@@ -112,5 +113,12 @@ describe('storage domain', () => {
 
     expect(result.presets).toEqual([{ id: 'manual', name: 'Trabajo real' }]);
     expect(result.sessions).toEqual([{ id: 'real-session', name: 'Sesion guardada' }]);
+  });
+
+  test('showSoundNames key exists and round-trips correctly', () => {
+    const storage = memoryStorage();
+    writeJson(storage, STORAGE_KEYS.showSoundNames, false);
+    expect(readJson(storage, STORAGE_KEYS.showSoundNames, true)).toBe(false);
+    expect(readJson(memoryStorage(), STORAGE_KEYS.showSoundNames, true)).toBe(true);
   });
 });
