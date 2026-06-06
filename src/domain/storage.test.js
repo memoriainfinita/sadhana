@@ -6,6 +6,7 @@ import {
   readJson,
   savePreset,
   saveSession,
+  seedDefaultPresets,
   STORAGE_KEYS,
   writeJson,
 } from './storage.js';
@@ -113,6 +114,27 @@ describe('storage domain', () => {
 
     expect(result.presets).toEqual([{ id: 'manual', name: 'Trabajo real' }]);
     expect(result.sessions).toEqual([{ id: 'real-session', name: 'Sesion guardada' }]);
+  });
+
+  test('seedDefaultPresets writes defaults when storage is empty', () => {
+    const storage = memoryStorage();
+    const defaults = [{ id: 'p1', name: 'Preset 1', cues: [] }];
+
+    const result = seedDefaultPresets(storage, defaults);
+
+    expect(result).toEqual(defaults);
+    expect(readJson(storage, STORAGE_KEYS.presets, [])).toEqual(defaults);
+  });
+
+  test('seedDefaultPresets does not overwrite existing presets', () => {
+    const existing = [{ id: 'user', name: 'Mi preset', cues: [] }];
+    const storage = memoryStorage({
+      'sadhana-next.presets': JSON.stringify(existing),
+    });
+
+    const result = seedDefaultPresets(storage, [{ id: 'default', name: 'Default', cues: [] }]);
+
+    expect(result).toEqual(existing);
   });
 
   test('showSoundNames key exists and round-trips correctly', () => {
