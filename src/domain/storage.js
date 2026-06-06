@@ -64,6 +64,13 @@ export function deleteSession(storage, sessionId) {
   return next;
 }
 
+export function seedDefaultPresets(storage, defaults) {
+  const existing = readJson(storage, STORAGE_KEYS.presets, []);
+  if (existing.length > 0) return existing;
+  writeJson(storage, STORAGE_KEYS.presets, defaults);
+  return defaults;
+}
+
 function isOldSample(item) {
   return OLD_SAMPLE_IDS.has(item?.id) || OLD_SAMPLE_NAMES.has(item?.name);
 }

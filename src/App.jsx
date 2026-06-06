@@ -27,8 +27,10 @@ import {
   readJson,
   savePreset,
   saveSession,
+  seedDefaultPresets,
   writeJson,
 } from './domain/storage.js';
+import { DEFAULT_PRESETS } from './domain/presets.js';
 
 const SESSION_DURATION_SECONDS = 24 * 60;
 
@@ -46,7 +48,7 @@ export function App() {
   const [cues, setCues] = useState(DEFAULT_CUES);
   const [selectedCueId, setSelectedCueId] = useState('forest');
   const [initialStorage] = useState(() => cleanStoredExamples(window.localStorage));
-  const [presets, setPresets] = useState(() => initialStorage.presets);
+  const [presets, setPresets] = useState(() => seedDefaultPresets(window.localStorage, DEFAULT_PRESETS));
   const [sessions, setSessions] = useState(() => initialStorage.sessions);
   const [loadedPreset, setLoadedPreset] = useState(null);
   const [notice, setNotice] = useState('');
