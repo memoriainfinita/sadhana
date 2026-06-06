@@ -6,12 +6,12 @@ const REQUIRED_CUE_FIELDS = ['id', 'name', 'sound', 'time', 'duration', 'volume'
 const validSounds = new Set(SOUND_OPTIONS.map((o) => o.value));
 
 describe('default presets', () => {
-  test('contains exactly 4 presets with unique ids and names', () => {
-    expect(DEFAULT_PRESETS).toHaveLength(4);
+  test('contains exactly 5 presets with unique ids and names', () => {
+    expect(DEFAULT_PRESETS).toHaveLength(5);
     const ids = DEFAULT_PRESETS.map((p) => p.id);
     const names = DEFAULT_PRESETS.map((p) => p.name);
-    expect(new Set(ids).size).toBe(4);
-    expect(new Set(names).size).toBe(4);
+    expect(new Set(ids).size).toBe(5);
+    expect(new Set(names).size).toBe(5);
   });
 
   test('every preset has at least 4 cues', () => {
