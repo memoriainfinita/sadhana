@@ -295,6 +295,23 @@ button {
   transition: opacity 0.4s ease;
 }
 
+.playing-instruction-label {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  min-height: 30px;
+  margin-bottom: 4px;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+  text-align: center;
+}
+
+.playing-instruction-label.visible {
+  opacity: 1;
+  transition: opacity 0.4s ease;
+}
+
 .timer-panel-header {
   width: 100%;
   display: flex;

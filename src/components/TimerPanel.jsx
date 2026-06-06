@@ -7,7 +7,7 @@ function formatRemaining(seconds) {
   return `${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`;
 }
 
-export function TimerPanel({ session, onStart, onPause, onResume, onStop, onNudge, onZen, zenMode = false, presetName, playingCueName, cues, playingCueId, cuesVisible, onToggleCues, onEditCues }) {
+export function TimerPanel({ session, onStart, onPause, onResume, onStop, onNudge, onZen, zenMode = false, presetName, playingCueName, playingInstruction, showSoundNames = true, cues, playingCueId, cuesVisible, onToggleCues, onEditCues }) {
   const remaining = getRemainingSeconds(session);
   const isRunning = session.status === 'running';
   const isPaused = session.status === 'paused';
@@ -29,9 +29,14 @@ export function TimerPanel({ session, onStart, onPause, onResume, onStop, onNudg
       <div className="timer-progress">
         <div className="timer-progress-fill" style={{ width: `${progress}%` }} />
       </div>
-      <div className={`playing-cue-label${playingCueName ? ' visible' : ''}`}>
-        {playingCueName}
+      <div className={`playing-instruction-label${playingInstruction ? ' visible' : ''}`}>
+        {playingInstruction}
       </div>
+      {showSoundNames && (
+        <div className={`playing-cue-label${playingCueName ? ' visible' : ''}`}>
+          {playingCueName}
+        </div>
+      )}
       <div className="timer-controls">
         <button className="round-button secondary" type="button" onClick={() => onNudge(-15)} aria-label="Retroceder 15 segundos" title="Retroceder 15 segundos">
           <RotateCcw size={20} />
