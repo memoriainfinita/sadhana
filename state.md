@@ -1,6 +1,6 @@
 ---
 created: 2026-05-09
-last_updated: 2026-06-06
+last_updated: 2026-06-07
 ---
 
 # Sadhana State
@@ -13,7 +13,7 @@ last_updated: 2026-06-06
 
 ## Services
 
-- Dev server: `pnpm dev` en `http://localhost:5173/`. Parado al cierre de sesion 2026-06-06.
+- Dev server: `pnpm dev` en `http://localhost:5173/` (si el puerto esta libre; usar `--port 5200` si hay conflicto).
 
 ## Preferences
 
@@ -38,11 +38,12 @@ last_updated: 2026-06-06
 - 2026-06-06: Batida de codigo muerto: ModePanel.jsx eliminado (huerfano), prop onSavePreset eliminada de CueInspector, bug en OLD_SAMPLE_NAMES corregido ('Nueva cue'/'Nueva cue copia' ya no filtran presets legítimos).
 - 2026-06-06: Tests: arreglados 2 tests incorrectos (scheduler arg fantasma, cobertura de sonidos), añadidos 4 tests nuevos (clampCueTime, savePreset, saveSession, regresion cleanStoredExamples). Total: 24 tests verdes.
 - 2026-06-06: Registro completo de audios: plugin Vite `virtual:audio-manifest` autodescubre `public/audio/**/*.mp3` al arrancar. SOUND_OPTIONS y SOUND_OPTION_GROUPS generados dinamicamente desde `src/domain/sounds.js`. CueInspector usa `<optgroup>` por categoria. Renombrado `bells/3 chime-meditation.mp3` → `bells/chime-meditation.mp3`. 51 archivos registrados.
-- 2026-06-06: Disenado y planificado campo `instruction` en cues. Spec: `docs/superpowers/specs/2026-06-06-instruction-field-design.md`. Plan: `docs/superpowers/plans/2026-06-06-instruction-field.md`. Pendiente de implementar.
+- 2026-06-06: Disenado y planificado campo `instruction` en cues. Spec: `docs/superpowers/specs/2026-06-06-instruction-field-design.md`. Plan: `docs/superpowers/plans/2026-06-06-instruction-field.md`.
+- 2026-06-07: Campo `instruction` implementado — 7 tareas via subagent-driven-development, 6 commits (b0b3a98..808d308), 28 tests verdes. Modelo extendido (instruction/instructionDuration), storage key, App state + scheduler, TimerPanel con dos zonas de display y fades asimetricos, GlobalPanel con toggle "Mostrar nombre del sonido", CueInspector con campos Instruccion + Visibilidad (s).
 
 ## TODO
 
-- [ ] Campo `instruction` en cues — DISENADO, plan listo en `docs/superpowers/plans/2026-06-06-instruction-field.md`. Proxima sesion: ejecutar plan (7 tareas, TDD).
+- [x] Campo `instruction` en cues — implementado 2026-06-07.
 - [ ] Refinar scheduling de audio: precision, fades reales, replay correcto al rebobinar y mezcla de clips largos.
 - [ ] i18n: contexto `LanguageContext` + hook `useT()` + objetos `es.js`/`en.js` en `src/i18n/`, toggle en Settings. Afecta todos los componentes.
 - [ ] Accesos de teclado basicos: espacio para play/pause, escape para salir del zen, flechas para nudge ±15s, quizas 1/2/3 para cambiar de modo.
