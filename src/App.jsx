@@ -68,6 +68,7 @@ export function App() {
   const audioRegistry = useRef(new AudioRegistry());
   const cueHistory = useRef([]);
   const schedulerState = useRef(createCueSchedulerState());
+  const shortcutsRef = useRef({});
 
   const selectedCue = useMemo(() => getCueById(cues, selectedCueId), [cues, selectedCueId]);
 
@@ -139,6 +140,57 @@ export function App() {
     schedulerState.current = resetCueScheduler();
     setNotice('Sesion guardada en Recordar');
   }, [session.status, session.durationSeconds, selectedCue]);
+
+  useEffect(() => {
+    function handleKey(event) {
+      const tag = event.target.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+      const { session, activeMode, zenMode, timerPanelProps, handleNudge, setActiveMode, setZenMode } = shortcutsRef.current;
+      const inPractice = activeMode === 'practice';
+
+      switch (event.key) {
+        case ' ':
+          if (activeMode !== 'practice' && activeMode !== 'design') return;
+          event.preventDefault();
+          if (session.status === 'idle' || session.status === 'complete') timerPanelProps.onStart();
+          else if (session.status === 'running') timerPanelProps.onPause();
+          else if (session.status === 'paused') timerPanelProps.onResume();
+          break;
+        case 'ArrowLeft':
+          if (!inPractice) return;
+          event.preventDefault();
+          handleNudge(-15);
+          break;
+        case 'ArrowRight':
+          if (!inPractice) return;
+          event.preventDefault();
+          handleNudge(15);
+          break;
+        case 'f':
+        case 'F':
+          if (!inPractice || zenMode) return;
+          setZenMode(true);
+          break;
+        case 'Escape':
+          if (zenMode) setZenMode(false);
+          break;
+        case '1':
+          setActiveMode('practice');
+          break;
+        case '2':
+          setActiveMode('design');
+          break;
+        case '3':
+          setActiveMode('remember');
+          break;
+        default:
+          break;
+      }
+    }
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, []);
 
   function setCuesWithHistory(updater) {
     setCues((current) => {
@@ -308,6 +360,8 @@ export function App() {
     },
     onNudge: handleNudge,
   };
+
+  shortcutsRef.current = { session, activeMode, zenMode, timerPanelProps, handleNudge, setActiveMode, setZenMode };
 
   const timelinePanel = (
     <Timeline
