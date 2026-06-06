@@ -24,6 +24,7 @@ import {
   cleanStoredExamples,
   deletePreset,
   deleteSession,
+  readJson,
   savePreset,
   saveSession,
   writeJson,
@@ -56,6 +57,10 @@ export function App() {
   const [cuesVisible, setCuesVisible] = useState(true);
   const [playingCueId, setPlayingCueId] = useState(null);
   const [playingCueName, setPlayingCueName] = useState(null);
+  const [playingInstruction, setPlayingInstruction] = useState(null);
+  const [showSoundNames, setShowSoundNames] = useState(
+    () => readJson(window.localStorage, STORAGE_KEYS.showSoundNames, true)
+  );
   const [session, dispatchSession] = useReducer(
     sessionReducer,
     createSessionState({ durationSeconds: SESSION_DURATION_SECONDS })
@@ -107,6 +112,14 @@ export function App() {
         window.setTimeout(() => audioRegistry.current.stopCue(cue.id), cue.duration * 1000);
       }
       setPlayingCueId(cue.id);
+
+      const instruction = cue.instruction ?? '';
+      const instructionDuration = cue.instructionDuration ?? 5;
+      if (instruction) {
+        setPlayingInstruction(instruction);
+        window.setTimeout(() => setPlayingInstruction(null), instructionDuration * 1000);
+      }
+
       setPlayingCueName(cue.name);
       window.setTimeout(() => setPlayingCueName(null), 3000);
     });
@@ -250,6 +263,11 @@ export function App() {
     }
   }
 
+  function handleShowSoundNamesChange(value) {
+    setShowSoundNames(value);
+    writeJson(window.localStorage, STORAGE_KEYS.showSoundNames, value);
+  }
+
   function handleTriggerCue(cue) {
     setSelectedCueId(cue.id);
     audioRegistry.current.playCue(cue, { volumeScale: masterVolume / 100, muted });
@@ -360,11 +378,20 @@ export function App() {
         onStopAudio={() => audioRegistry.current.stopAll()}
         onExportData={handleExportData}
         onImportData={handleImportData}
+        showSoundNames={showSoundNames}
+        onShowSoundNamesChange={handleShowSoundNamesChange}
       />
 
       {zenMode && (
         <div className="zen-overlay">
-          <TimerPanel {...timerPanelProps} onZen={() => setZenMode(false)} zenMode playingCueName={playingCueName} />
+          <TimerPanel
+            {...timerPanelProps}
+            onZen={() => setZenMode(false)}
+            zenMode
+            playingCueName={playingCueName}
+            playingInstruction={playingInstruction}
+            showSoundNames={showSoundNames}
+          />
         </div>
       )}
 
@@ -376,6 +403,8 @@ export function App() {
               onZen={() => setZenMode(true)}
               presetName={loadedPreset?.name}
               playingCueName={playingCueName}
+              playingInstruction={playingInstruction}
+              showSoundNames={showSoundNames}
               cues={cues}
               playingCueId={playingCueId}
               cuesVisible={cuesVisible}
