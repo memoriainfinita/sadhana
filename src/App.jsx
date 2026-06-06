@@ -142,6 +142,14 @@ export function App() {
   }, [session.status, session.durationSeconds, selectedCue]);
 
   useEffect(() => {
+    if (session.status === 'idle' || session.status === 'complete') return;
+    dispatchSession({ type: 'stop' });
+    audioRegistry.current.stopAll();
+    schedulerState.current = resetCueScheduler();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMode]);
+
+  useEffect(() => {
     function handleKey(event) {
       const tag = event.target.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -326,6 +334,12 @@ export function App() {
   }
 
   function handleSeek(seconds) {
+    if (seconds < session.elapsedSeconds) {
+      const played = schedulerState.current.playedCueIds;
+      cues.forEach((cue) => {
+        if (cue.time > seconds) played.delete(cue.id);
+      });
+    }
     dispatchSession({ type: 'nudge', seconds: seconds - session.elapsedSeconds });
   }
 
