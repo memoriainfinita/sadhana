@@ -26,4 +26,19 @@ describe('cue scheduler domain', () => {
   test('resetCueScheduler returns an empty scheduler state', () => {
     expect(resetCueScheduler()).toEqual(createCueSchedulerState());
   });
+
+  test('re-fires a cue after its id is removed from playedCueIds (backward seek pattern)', () => {
+    const cues = [{ id: 'bell', time: 10 }];
+    let state = createCueSchedulerState();
+
+    let result = getDueCues(cues, state, 10);
+    expect(result.due.map((c) => c.id)).toEqual(['bell']);
+    state = result.state;
+
+    // simulate backward seek: remove cues with time > newElapsed
+    state.playedCueIds.delete('bell');
+
+    result = getDueCues(cues, state, 10);
+    expect(result.due.map((c) => c.id)).toEqual(['bell']);
+  });
 });
