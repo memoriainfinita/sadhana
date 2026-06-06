@@ -127,6 +127,8 @@ export function createCue({ atTime = 0, durationSeconds = 24 * 60 } = {}) {
     volume: 70,
     fadeIn: 2,
     fadeOut: 2,
+    instruction: '',
+    instructionDuration: 5,
     notes: '',
   };
 }
