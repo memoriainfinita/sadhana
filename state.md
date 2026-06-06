@@ -1,6 +1,6 @@
 ---
 created: 2026-05-09
-last_updated: 2026-06-07
+last_updated: 2026-06-08
 ---
 
 # Sadhana State
@@ -40,14 +40,18 @@ last_updated: 2026-06-07
 - 2026-06-06: Registro completo de audios: plugin Vite `virtual:audio-manifest` autodescubre `public/audio/**/*.mp3` al arrancar. SOUND_OPTIONS y SOUND_OPTION_GROUPS generados dinamicamente desde `src/domain/sounds.js`. CueInspector usa `<optgroup>` por categoria. Renombrado `bells/3 chime-meditation.mp3` → `bells/chime-meditation.mp3`. 51 archivos registrados.
 - 2026-06-06: Disenado y planificado campo `instruction` en cues. Spec: `docs/superpowers/specs/2026-06-06-instruction-field-design.md`. Plan: `docs/superpowers/plans/2026-06-06-instruction-field.md`.
 - 2026-06-07: Campo `instruction` implementado — 7 tareas via subagent-driven-development, 6 commits (b0b3a98..808d308), 28 tests verdes. Modelo extendido (instruction/instructionDuration), storage key, App state + scheduler, TimerPanel con dos zonas de display y fades asimetricos, GlobalPanel con toggle "Mostrar nombre del sonido", CueInspector con campos Instruccion + Visibilidad (s).
+- 2026-06-08: Atajos de teclado — Space (play/pause/resume), ←→ nudge ±15s (solo Practicar), F (zen), Escape (salir zen), 1/2/3 (modos). Un useEffect con ref para evitar closures rancias. Commit 8342788.
+- 2026-06-08: Fix audio/preview — sesion para automaticamente al cambiar de modo (useEffect en activeMode). Seek hacia atras resetea scheduler (borra cues con time > newElapsed de playedCueIds). Commit 65509dc.
+- 2026-06-08: 5 presets por defecto — Pranayama 4-7-8 (15 min), Meditacion matutina (20 min), Relajacion profunda (30 min), Caminata consciente (10 min), Yoga Nidra (30 min). Semillados via seedDefaultPresets en primer arranque. src/domain/presets.js. Commits e9ed3f2, c97497f.
+- 2026-06-08: Tests ampliados — seedDefaultPresets (2), backward seek scheduler (1), integridad DEFAULT_PRESETS (5). Total: 36 tests verdes en 7 archivos. Commit 5b79296.
 
 ## TODO
 
 - [x] Campo `instruction` en cues — implementado 2026-06-07.
-- [ ] Refinar scheduling de audio: precision, fades reales, replay correcto al rebobinar y mezcla de clips largos.
+- [ ] Audio scheduling — precision de timing (interval 250ms), mezcla de clips largos, replay al rebobinar ya parcialmente resuelto (scheduler reset en seek backward). Pendiente: precision y mezcla.
 - [ ] i18n: contexto `LanguageContext` + hook `useT()` + objetos `es.js`/`en.js` en `src/i18n/`, toggle en Settings. Afecta todos los componentes.
-- [ ] Accesos de teclado basicos: espacio para play/pause, escape para salir del zen, flechas para nudge ±15s, quizas 1/2/3 para cambiar de modo.
-- [ ] Crear presets basicos de ejemplo que se incluyan por defecto en la app (no como fallback de muestra sino como contenido real): sesiones de meditacion, respiracion, movimiento, etc. con cues, tiempos y audios bien configurados.
+- [x] Accesos de teclado — implementado 2026-06-08.
+- [x] Crear presets basicos de ejemplo — 5 presets implementados 2026-06-08.
 - [ ] Timeline track clips redimensionables: arrastrar el borde derecho del clip para cambiar `duration` de la cue, al estilo DAW.
 - [ ] Handles de fade en los clips del timeline: esquina superior izquierda para fade in, esquina superior derecha para fade out — arrastrar horizontalmente cambia `fadeIn`/`fadeOut`, con indicador visual de la rampa, al estilo Reaper.
 - [x] Batida de codigo muerto y features a medio implementar.
