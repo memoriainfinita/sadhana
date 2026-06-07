@@ -107,12 +107,17 @@ export function App() {
     const result = getDueCues(cues, schedulerState.current, session.elapsedSeconds);
     schedulerState.current = result.state;
     result.due.forEach((cue) => {
+      audioRegistry.current.stopCue(cue.id);
       const audio = audioRegistry.current.playCue(cue, {
         volumeScale: masterVolume / 100,
         muted,
       });
       if (audio && cue.duration > 0) {
-        window.setTimeout(() => audioRegistry.current.stopCue(cue.id), cue.duration * 1000);
+        const captured = audio;
+        window.setTimeout(
+          () => audioRegistry.current.stopInstance(cue.id, captured),
+          cue.duration * 1000
+        );
       }
       setPlayingCueId(cue.id);
 
