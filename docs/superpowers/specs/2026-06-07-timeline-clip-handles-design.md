@@ -39,7 +39,13 @@ localFadeIn:   number   // mirrors cue.fadeIn during drag
 localFadeOut:  number   // mirrors cue.fadeOut during drag
 ```
 
-Local state is initialized from `cue` on `pointerDown` and cleared on `pointerUp`. This provides live visual feedback without touching global state on every pointer event. On `pointerUp`, the relevant callback is called with the final value.
+**Drag origin ref** (not state — avoids re-renders):
+```js
+dragOrigin = useRef({ startX: 0, startDuration: 0, startFadeIn: 0, startFadeOut: 0 })
+```
+Populated on `pointerDown` with `event.clientX` and the cue's current values. Read on every `pointerMove` to compute deltas.
+
+Local state (`localDuration`, `localFadeIn`, `localFadeOut`) is initialized from `cue` on `pointerDown` and cleared on `pointerUp`/`pointerCancel`. On `pointerUp`, the relevant callback is called with the final value.
 
 ### Changes to `Timeline.jsx`
 
@@ -65,6 +71,10 @@ Both use the existing `updateCue` utility from `cues.js`.
 ## Handles
 
 Three `<div>` elements inside `.track-clip`, each with `onPointerDown`. Pointer capture (`setPointerCapture`) is used for reliable drag across the full track width.
+
+**Event handler placement:** `onPointerMove` and `onPointerUp`/`onPointerCancel` are registered on each handle element (same element that holds `onPointerDown`). With pointer capture active, all pointer events are routed to the capturing element regardless of where the pointer moves. `onPointerCancel` clears `dragType` and local state the same way as `onPointerUp` (without calling any callback).
+
+**Selection on handle click:** each handle calls `onSelect()` in its `onPointerDown` before capturing the pointer. This ensures the cue is selected even when the user clicks a handle without dragging. No `stopPropagation` needed — pointer capture redirects subsequent events to the handle, so the row div's `onClick` never fires during a drag.
 
 ### Resize handle (`.clip-resize-handle`)
 - Position: `right: 0`, full height, ~8px wide
@@ -141,6 +151,15 @@ The resize handle (right edge) and fadeOut handle (top-right corner) share the r
 .clip-fade-out-handle            /* top-right corner drag zone */
 .track-clip.dragging             /* applied during any drag — keeps handles visible */
 ```
+
+**Z-index stacking order** (lowest to highest inside `.track-clip`):
+1. Ramp divs (`z-index: 0`, `pointer-events: none`) — always below everything
+2. Content (time label, name) — natural flow
+3. Handles (`z-index: 1`) — above ramps, receive pointer events
+
+## Accessibility
+
+Handles are **not keyboard accessible** — drag interactions are pointer-only. This is intentional; DAW-style handles have no meaningful keyboard equivalent. The `track-row` div (selection) retains full keyboard support via `role="button"`, `tabIndex={0}`, and `onKeyDown` (Enter/Space).
 
 ## Testing
 
