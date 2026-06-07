@@ -101,4 +101,36 @@ describe('AudioRegistry', () => {
     expect(() => registry.stopInstance('bell', audioB)).not.toThrow();
     expect(registry.activeCount).toBe(1);
   });
+
+  test('playCue tracks entry with correct cueVolumeScale (no fadeIn)', () => {
+    const registry = new AudioRegistry();
+    const mockAudio = makeAudio();
+    vi.stubGlobal('Audio', vi.fn(() => mockAudio));
+
+    const cue = { id: 'bell', sound: 'bells/bell.mp3', volume: 60, fadeIn: 0, fadeOut: 0, duration: 0 };
+    registry.playCue(cue, { volumeScale: 0.8, muted: false });
+
+    expect(registry.activeCount).toBe(1);
+    const entry = [...registry.sources.get('bell')][0];
+    expect(entry.cueVolumeScale).toBeCloseTo(0.6); // 60/100
+    expect(mockAudio.volume).toBeCloseTo(0.6 * 0.8);
+
+    vi.unstubAllGlobals();
+  });
+
+  test('playCue sets cueVolumeScale to 0 when fadeIn > 0', () => {
+    const registry = new AudioRegistry();
+    const mockAudio = makeAudio();
+    vi.stubGlobal('Audio', vi.fn(() => mockAudio));
+    vi.stubGlobal('requestAnimationFrame', vi.fn()); // prevent rAF from running
+
+    const cue = { id: 'bell', sound: 'bells/bell.mp3', volume: 80, fadeIn: 2, fadeOut: 0, duration: 0 };
+    registry.playCue(cue, { volumeScale: 1, muted: false });
+
+    const entry = [...registry.sources.get('bell')][0];
+    expect(entry.cueVolumeScale).toBe(0); // starts at 0 for fade-in
+    expect(mockAudio.volume).toBe(0);
+
+    vi.unstubAllGlobals();
+  });
 });
