@@ -93,6 +93,16 @@ export class AudioRegistry {
     this.sources.delete(cueId);
   }
 
+  stopInstance(cueId, audio) {
+    const group = this.sources.get(cueId);
+    if (!group) return;
+    const entry = [...group].find((e) => e.audio === audio);
+    if (!entry) return;
+    audio.pause();
+    audio.currentTime = 0;
+    this.untrack(cueId, entry);
+  }
+
   stopAll() {
     this.sources.forEach((group) => {
       group.forEach(({ audio }) => {
