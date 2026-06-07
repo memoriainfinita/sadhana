@@ -49,23 +49,29 @@ export class AudioRegistry {
     if (typeof Audio === 'undefined') return null;
 
     const audio = new Audio(`${this.basePath}${cue.sound}`);
-    const targetVolume = Math.max(0, Math.min(1, (cue.volume / 100) * volumeScale));
     const fadeIn = cue.fadeIn ?? 0;
     const fadeOut = cue.fadeOut ?? 0;
     const duration = cue.duration ?? 0;
+    const cueVolumeScale = cue.volume / 100;
 
-    audio.volume = fadeIn > 0 ? 0 : targetVolume;
-    this.track(cue.id, audio, cue.volume);
+    const entry = {
+      audio,
+      baseVolume: cue.volume,
+      cueVolumeScale: fadeIn > 0 ? 0 : cueVolumeScale,
+    };
+
+    audio.volume = entry.cueVolumeScale * volumeScale;
+    this.track(cue.id, entry);
     audio.play?.().catch(() => {});
 
     if (fadeIn > 0) {
-      this._rampVolume(audio, 0, targetVolume, fadeIn * 1000);
+      this._rampVolume(entry, 0, cueVolumeScale, fadeIn * 1000);
     }
 
     if (fadeOut > 0 && duration > fadeOut) {
       window.setTimeout(() => {
         if (!audio.paused) {
-          this._rampVolume(audio, audio.volume, 0, fadeOut * 1000);
+          this._rampVolume(entry, entry.cueVolumeScale, 0, fadeOut * 1000);
         }
       }, (duration - fadeOut) * 1000);
     }
