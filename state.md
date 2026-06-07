@@ -44,11 +44,12 @@ last_updated: 2026-06-08
 - 2026-06-08: Fix audio/preview — sesion para automaticamente al cambiar de modo (useEffect en activeMode). Seek hacia atras resetea scheduler (borra cues con time > newElapsed de playedCueIds). Commit 65509dc.
 - 2026-06-08: 5 presets por defecto — Pranayama 4-7-8 (15 min), Meditacion matutina (20 min), Relajacion profunda (30 min), Caminata consciente (10 min), Yoga Nidra (30 min). Semillados via seedDefaultPresets en primer arranque. src/domain/presets.js. Commits e9ed3f2, c97497f.
 - 2026-06-08: Tests ampliados — seedDefaultPresets (2), backward seek scheduler (1), integridad DEFAULT_PRESETS (5). Total: 36 tests verdes en 7 archivos. Commit 5b79296.
+- 2026-06-07: Audio fixes — cue overlap en backward seek (stopCue antes de playCue + duration timeout con stopInstance), fade/master-volume conflict (AudioRegistry guarda _masterVolumeScale/_muted, entries con cueVolumeScale, _rampVolume lee estado live). 5 commits (df742e1..73c8f7d), 43 tests verdes. Specs: docs/superpowers/specs/2026-06-07-audio-fixes-design.md.
 
 ## TODO
 
 - [x] Campo `instruction` en cues — implementado 2026-06-07.
-- [ ] Audio scheduling — precision de timing (interval 250ms), mezcla de clips largos, replay al rebobinar ya parcialmente resuelto (scheduler reset en seek backward). Pendiente: precision y mezcla.
+- [x] Audio scheduling — overlap en seek y fade/volume conflict resueltos 2026-06-07. Precision de timing (250ms) aceptable, no requiere cambio.
 - [ ] i18n: contexto `LanguageContext` + hook `useT()` + objetos `es.js`/`en.js` en `src/i18n/`, toggle en Settings. Afecta todos los componentes.
 - [x] Accesos de teclado — implementado 2026-06-08.
 - [x] Crear presets basicos de ejemplo — 5 presets implementados 2026-06-08.
