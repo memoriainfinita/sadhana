@@ -2,6 +2,8 @@ export class AudioRegistry {
   constructor({ basePath = '/audio/' } = {}) {
     this.basePath = basePath;
     this.sources = new Map();
+    this._masterVolumeScale = 1;
+    this._muted = false;
   }
 
   get activeCount() {
@@ -12,13 +14,12 @@ export class AudioRegistry {
     return count;
   }
 
-  track(cueId, audio, baseVolume) {
-    const entry = { audio, baseVolume };
+  track(cueId, entry) {
     if (!this.sources.has(cueId)) {
       this.sources.set(cueId, new Set());
     }
     this.sources.get(cueId).add(entry);
-    audio.addEventListener?.('ended', () => this.untrack(cueId, entry), { once: true });
+    entry.audio.addEventListener?.('ended', () => this.untrack(cueId, entry), { once: true });
   }
 
   untrack(cueId, entry) {
@@ -72,9 +73,11 @@ export class AudioRegistry {
   }
 
   applyMasterVolume(volumeScale, muted) {
+    this._masterVolumeScale = volumeScale;
+    this._muted = muted;
     this.sources.forEach((group) => {
-      group.forEach(({ audio, baseVolume }) => {
-        audio.volume = muted ? 0 : Math.max(0, Math.min(1, (baseVolume / 100) * volumeScale));
+      group.forEach((entry) => {
+        entry.audio.volume = muted ? 0 : entry.cueVolumeScale * volumeScale;
       });
     });
   }
