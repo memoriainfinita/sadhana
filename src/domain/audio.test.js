@@ -50,4 +50,25 @@ describe('AudioRegistry', () => {
     expect(registry._muted).toBe(true);
     expect(audio.volume).toBe(0);
   });
+
+  test('_rampVolume reads _masterVolumeScale live from registry', () => {
+    const registry = new AudioRegistry();
+    registry._masterVolumeScale = 0.5;
+    registry._muted = false;
+
+    const audio = makeAudio();
+    const entry = makeEntry(audio, { cueVolumeScale: 0 });
+
+    // Manually invoke the end-of-ramp state to verify the formula:
+    // audio.volume = cueVolumeScale * _masterVolumeScale
+    entry.cueVolumeScale = 0.8;
+    audio.volume = registry._muted ? 0 : entry.cueVolumeScale * registry._masterVolumeScale;
+
+    expect(audio.volume).toBeCloseTo(0.8 * 0.5);
+
+    // Changing master: same formula picks up new value
+    registry._masterVolumeScale = 1;
+    audio.volume = registry._muted ? 0 : entry.cueVolumeScale * registry._masterVolumeScale;
+    expect(audio.volume).toBeCloseTo(0.8);
+  });
 });

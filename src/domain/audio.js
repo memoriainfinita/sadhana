@@ -31,13 +31,14 @@ export class AudioRegistry {
     }
   }
 
-  _rampVolume(audio, fromVolume, toVolume, durationMs) {
+  _rampVolume(entry, fromScale, toScale, durationMs) {
     const startTime = performance.now();
     const step = () => {
-      if (audio.paused) return;
+      if (entry.audio.paused) return;
       const elapsed = performance.now() - startTime;
       const progress = Math.min(1, elapsed / durationMs);
-      audio.volume = fromVolume + (toVolume - fromVolume) * progress;
+      entry.cueVolumeScale = fromScale + (toScale - fromScale) * progress;
+      entry.audio.volume = this._muted ? 0 : entry.cueVolumeScale * this._masterVolumeScale;
       if (progress < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
