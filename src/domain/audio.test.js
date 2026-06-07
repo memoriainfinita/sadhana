@@ -71,4 +71,34 @@ describe('AudioRegistry', () => {
     audio.volume = registry._muted ? 0 : entry.cueVolumeScale * registry._masterVolumeScale;
     expect(audio.volume).toBeCloseTo(0.8);
   });
+
+  test('stopInstance stops only the target audio, leaves others under same cueId', () => {
+    const registry = new AudioRegistry();
+    const audioA = makeAudio();
+    const audioB = makeAudio();
+    const entryA = makeEntry(audioA);
+    const entryB = makeEntry(audioB);
+
+    registry.track('bell', entryA);
+    registry.track('bell', entryB);
+    expect(registry.activeCount).toBe(2);
+
+    registry.stopInstance('bell', audioA);
+
+    expect(audioA.pause).toHaveBeenCalledOnce();
+    expect(audioA.currentTime).toBe(0);
+    expect(audioB.pause).not.toHaveBeenCalled();
+    expect(registry.activeCount).toBe(1);
+  });
+
+  test('stopInstance is a no-op when audio is not found', () => {
+    const registry = new AudioRegistry();
+    const audioA = makeAudio();
+    const audioB = makeAudio(); // not tracked
+
+    registry.track('bell', makeEntry(audioA));
+
+    expect(() => registry.stopInstance('bell', audioB)).not.toThrow();
+    expect(registry.activeCount).toBe(1);
+  });
 });
