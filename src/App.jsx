@@ -359,6 +359,22 @@ export function App() {
     setCuesWithHistory((current) => updateCue(current, cueId, { time: clampedTime }));
   }
 
+  function handleResizeCue(cueId, newDuration) {
+    setCuesWithHistory((current) =>
+      current.map((cue) => {
+        if (cue.id !== cueId) return cue;
+        // Keep fades within the new duration so audio stays valid.
+        const fadeOut = Math.min(cue.fadeOut, newDuration);
+        const fadeIn = Math.min(cue.fadeIn, newDuration - fadeOut);
+        return { ...cue, duration: newDuration, fadeIn, fadeOut };
+      })
+    );
+  }
+
+  function handleFadeCue(cueId, updates) {
+    setCuesWithHistory((current) => updateCue(current, cueId, updates));
+  }
+
   const timerPanelProps = {
     session,
     onStart() {
@@ -388,6 +404,8 @@ export function App() {
       elapsedSeconds={session.elapsedSeconds}
       onSelectCue={setSelectedCueId}
       onMoveCue={handleMoveCue}
+      onResizeCue={handleResizeCue}
+      onFadeCue={handleFadeCue}
       onSeek={handleSeek}
       onAddCue={handleAddCue}
       onUndo={handleUndoCueChange}
