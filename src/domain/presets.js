@@ -1,8 +1,21 @@
+// Single source of truth for a preset's session length: the stored
+// durationSeconds, or — for presets saved before that field existed — the end
+// of the last cue rounded up to a whole minute (minimum 60s).
+export function presetDurationSeconds(preset) {
+  if (typeof preset?.durationSeconds === 'number') return preset.durationSeconds;
+  const lastCueEnd = (preset?.cues ?? []).reduce(
+    (max, cue) => Math.max(max, cue.time + (cue.duration ?? 0)),
+    0
+  );
+  return Math.max(60, Math.ceil(lastCueEnd / 60) * 60);
+}
+
 export const DEFAULT_PRESETS = [
   {
     id: 'default-yoga-nidra',
-    name: 'Yoga Nidra 30 min',
+    name: 'Yoga Nidra',
     createdAt: '2026-06-07T00:00:00.000Z',
+    durationSeconds: 1800,
     cues: [
       {
         id: 'yn-start',
@@ -186,6 +199,7 @@ export const DEFAULT_PRESETS = [
     id: 'default-pranayama-478',
     name: 'Pranayama 4-7-8',
     createdAt: '2026-06-07T00:00:00.000Z',
+    durationSeconds: 900,
     cues: [
       {
         id: 'pr478-start',
@@ -305,6 +319,7 @@ export const DEFAULT_PRESETS = [
     id: 'default-meditacion-matutina',
     name: 'Meditacion matutina',
     createdAt: '2026-06-07T00:00:00.000Z',
+    durationSeconds: 1200,
     cues: [
       {
         id: 'mm-start',
@@ -408,6 +423,7 @@ export const DEFAULT_PRESETS = [
     id: 'default-relajacion-profunda',
     name: 'Relajacion profunda',
     createdAt: '2026-06-07T00:00:00.000Z',
+    durationSeconds: 1800,
     cues: [
       {
         id: 'rp-start',
@@ -527,6 +543,7 @@ export const DEFAULT_PRESETS = [
     id: 'default-caminata-consciente',
     name: 'Caminata consciente',
     createdAt: '2026-06-07T00:00:00.000Z',
+    durationSeconds: 600,
     cues: [
       {
         id: 'cc-start',

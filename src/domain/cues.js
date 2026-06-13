@@ -11,6 +11,8 @@ export const DEFAULT_CUES = [
     volume: 76,
     fadeIn: 1,
     fadeOut: 7,
+    instruction: '',
+    instructionDuration: 5,
     notes: 'Entrada seca para marcar inicio.',
   },
   {
@@ -25,6 +27,8 @@ export const DEFAULT_CUES = [
     volume: 48,
     fadeIn: 15,
     fadeOut: 18,
+    instruction: '',
+    instructionDuration: 5,
     notes: 'Textura ligera para cubrir transiciones.',
   },
   {
@@ -39,6 +43,8 @@ export const DEFAULT_CUES = [
     volume: 54,
     fadeIn: 18,
     fadeOut: 22,
+    instruction: '',
+    instructionDuration: 5,
     notes: 'Capa ambiental larga con fundidos lentos.',
   },
   {
@@ -53,6 +59,8 @@ export const DEFAULT_CUES = [
     volume: 64,
     fadeIn: 2,
     fadeOut: 6,
+    instruction: '',
+    instructionDuration: 5,
     notes: 'Cue puntual para recuperar ritmo.',
   },
   {
@@ -67,6 +75,8 @@ export const DEFAULT_CUES = [
     volume: 78,
     fadeIn: 3,
     fadeOut: 20,
+    instruction: '',
+    instructionDuration: 5,
     notes: 'Aviso de tramo final con cola larga.',
   },
   {
@@ -81,6 +91,8 @@ export const DEFAULT_CUES = [
     volume: 82,
     fadeIn: 8,
     fadeOut: 18,
+    instruction: '',
+    instructionDuration: 5,
     notes: 'Cierre resonante con cola amplia.',
   },
 ];
