@@ -2,6 +2,7 @@ export const STORAGE_KEYS = {
   presets: 'sadhana-next.presets',
   sessions: 'sadhana-next.sessions',
   showSoundNames: 'sadhana-next.showSoundNames',
+  examplesCleaned: 'sadhana-next.examplesCleaned',
 };
 
 const OLD_SAMPLE_IDS = new Set([
@@ -83,4 +84,20 @@ export function cleanStoredExamples(storage) {
   writeJson(storage, STORAGE_KEYS.sessions, sessions);
 
   return { presets, sessions };
+}
+
+// One-time migration: purge legacy sample presets/sessions from existing users
+// once, then never filter by name again (avoids deleting user data that happens
+// to share a name with an old sample).
+export function cleanStoredExamplesOnce(storage) {
+  if (readJson(storage, STORAGE_KEYS.examplesCleaned, false)) {
+    return {
+      presets: readJson(storage, STORAGE_KEYS.presets, []),
+      sessions: readJson(storage, STORAGE_KEYS.sessions, []),
+    };
+  }
+
+  const result = cleanStoredExamples(storage);
+  writeJson(storage, STORAGE_KEYS.examplesCleaned, true);
+  return result;
 }

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
   cleanStoredExamples,
+  cleanStoredExamplesOnce,
   deletePreset,
   deleteSession,
   readJson,
@@ -114,6 +115,35 @@ describe('storage domain', () => {
 
     expect(result.presets).toEqual([{ id: 'manual', name: 'Trabajo real' }]);
     expect(result.sessions).toEqual([{ id: 'real-session', name: 'Sesion guardada' }]);
+  });
+
+  test('cleanStoredExamplesOnce filters on first run and sets the cleaned flag', () => {
+    const storage = memoryStorage({
+      'sadhana-next.presets': JSON.stringify([
+        { id: 'sample-ritual', name: 'Ritual base' },
+        { id: 'manual', name: 'Trabajo real' },
+      ]),
+      'sadhana-next.sessions': JSON.stringify([]),
+    });
+
+    const result = cleanStoredExamplesOnce(storage);
+
+    expect(result.presets).toEqual([{ id: 'manual', name: 'Trabajo real' }]);
+    expect(readJson(storage, STORAGE_KEYS.examplesCleaned, false)).toBe(true);
+  });
+
+  test('cleanStoredExamplesOnce does not filter again once the flag is set', () => {
+    const storage = memoryStorage({
+      'sadhana-next.examplesCleaned': JSON.stringify(true),
+      'sadhana-next.presets': JSON.stringify([
+        { id: 'whatever', name: 'Relajación profunda' },
+      ]),
+      'sadhana-next.sessions': JSON.stringify([]),
+    });
+
+    const result = cleanStoredExamplesOnce(storage);
+
+    expect(result.presets).toEqual([{ id: 'whatever', name: 'Relajación profunda' }]);
   });
 
   test('seedDefaultPresets writes defaults when storage is empty', () => {

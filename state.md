@@ -1,6 +1,6 @@
 ---
 created: 2026-05-09
-last_updated: 2026-06-08
+last_updated: 2026-06-13
 ---
 
 # Sadhana State
@@ -45,6 +45,8 @@ last_updated: 2026-06-08
 - 2026-06-08: 5 presets por defecto — Pranayama 4-7-8 (15 min), Meditacion matutina (20 min), Relajacion profunda (30 min), Caminata consciente (10 min), Yoga Nidra (30 min). Semillados via seedDefaultPresets en primer arranque. src/domain/presets.js. Commits e9ed3f2, c97497f.
 - 2026-06-08: Tests ampliados — seedDefaultPresets (2), backward seek scheduler (1), integridad DEFAULT_PRESETS (5). Total: 36 tests verdes en 7 archivos. Commit 5b79296.
 - 2026-06-07: Audio fixes — cue overlap en backward seek (stopCue antes de playCue + duration timeout con stopInstance), fade/master-volume conflict (AudioRegistry guarda _masterVolumeScale/_muted, entries con cueVolumeScale, _rampVolume lee estado live). 5 commits (df742e1..73c8f7d), 43 tests verdes. Specs: docs/superpowers/specs/2026-06-07-audio-fixes-design.md.
+- 2026-06-13: Auditoria de codigo y limpieza. (1) cleanStoredExamples ya no filtra por nombre en cada arranque: nueva cleanStoredExamplesOnce con flag examplesCleaned, limpia una vez para usuarios viejos y nunca mas (eliminado riesgo de borrar presets/sesiones del usuario por coincidencia de nombre). (2) Codigo muerto eliminado: handleTriggerCue (feature trigger-al-click revertida) y public/audio/audio-list.js (huerfano, reemplazado por virtual:audio-manifest, via git rm). (3) Bug: slider Tiempo de CueInspector usaba max=1440 fijo, ahora usa durationSeconds (permite colocar cues en sesiones >24 min). (4) Guardado de sesion deduplicado en helper persistSession. (5) Datos demo ficticios reemplazados por estados vacios reales en PresetLibrary y RecentSessions. (6) DEFAULT_CUES ahora llevan instruction/instructionDuration igual que createCue.
+- 2026-06-13: Duracion de presets como fuente de verdad. Los 5 presets por defecto llevan durationSeconds; savePreset guarda session.durationSeconds; handleLoadPreset aplica la duracion al cargar (antes se quedaba siempre en 24 min). Funcion presetDurationSeconds(preset) extraida a domain/presets.js (usa durationSeconds o deriva del fin de la ultima cue redondeado al minuto) y usada por App y por la tarjeta de PresetLibrary (muestra "N cues · M min"). Renombrado "Yoga Nidra 30 min" -> "Yoga Nidra" (el tiempo en el nombre era decorativo y no cuadraba). 49 tests verdes.
 
 ## TODO
 
@@ -55,6 +57,7 @@ last_updated: 2026-06-08
 - [x] Crear presets basicos de ejemplo — 5 presets implementados 2026-06-08.
 - [ ] Timeline track clips redimensionables: arrastrar el borde derecho del clip para cambiar `duration` de la cue, al estilo DAW.
 - [ ] Handles de fade en los clips del timeline: esquina superior izquierda para fade in, esquina superior derecha para fade out — arrastrar horizontalmente cambia `fadeIn`/`fadeOut`, con indicador visual de la rampa, al estilo Reaper.
+- [ ] Diseñar: en la barra de controles de reproduccion encima del timeline, mostrar la instruccion de la cue activa junto al tiempo. Ayuda a comprobar las instrucciones mientras se prueba el diseño.
 - [x] Batida de codigo muerto y features a medio implementar.
 - [x] Registrar todos los audios en SOUND_OPTIONS.
 - [x] Persistir presets y sesiones de forma exportable/importable.

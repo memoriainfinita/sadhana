@@ -1,7 +1,7 @@
 import { Copy, Play, Square, Trash2 } from 'lucide-react';
 import { SOUND_OPTION_GROUPS, formatClockTime } from '../domain/cues.js';
 
-export function CueInspector({ cue, onChange, onPreview, onStopPreview, onDuplicate, onDelete }) {
+export function CueInspector({ cue, durationSeconds = 1440, onChange, onPreview, onStopPreview, onDuplicate, onDelete }) {
   if (!cue) return null;
 
   return (
@@ -65,7 +65,7 @@ export function CueInspector({ cue, onChange, onPreview, onStopPreview, onDuplic
         <input
           type="range"
           min="0"
-          max="1440"
+          max={durationSeconds}
           value={cue.time}
           onChange={(event) => onChange({ time: Number(event.target.value) })}
         />

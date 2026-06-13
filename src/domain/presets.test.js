@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { DEFAULT_PRESETS } from './presets.js';
+import { DEFAULT_PRESETS, presetDurationSeconds } from './presets.js';
 import { SOUND_OPTIONS } from './sounds.js';
 
 const REQUIRED_CUE_FIELDS = ['id', 'name', 'sound', 'time', 'duration', 'volume', 'fadeIn', 'fadeOut', 'instruction', 'instructionDuration'];
@@ -36,6 +36,30 @@ describe('default presets', () => {
         expect(validSounds, `${preset.name} > ${cue.id} uses unknown sound "${cue.sound}"`).toContain(cue.sound);
       });
     });
+  });
+
+  test('every preset has a durationSeconds covering its last cue', () => {
+    DEFAULT_PRESETS.forEach((preset) => {
+      const lastCueStart = Math.max(...preset.cues.map((cue) => cue.time));
+      expect(preset.durationSeconds, `${preset.name} missing durationSeconds`).toBeGreaterThan(0);
+      expect(preset.durationSeconds, `${preset.name} duration shorter than last cue`).toBeGreaterThanOrEqual(lastCueStart);
+    });
+  });
+
+  test('presetDurationSeconds uses the stored durationSeconds when present', () => {
+    const preset = { durationSeconds: 900, cues: [{ time: 1800, duration: 60 }] };
+    expect(presetDurationSeconds(preset)).toBe(900);
+  });
+
+  test('presetDurationSeconds derives from last cue end, rounded up to a minute', () => {
+    const preset = { cues: [{ time: 60, duration: 30 }, { time: 1770, duration: 120 }] };
+    // last cue ends at 1890s -> rounds up to 1920s (32 min)
+    expect(presetDurationSeconds(preset)).toBe(1920);
+  });
+
+  test('presetDurationSeconds falls back to a 60s minimum for empty cues', () => {
+    expect(presetDurationSeconds({ cues: [] })).toBe(60);
+    expect(presetDurationSeconds({})).toBe(60);
   });
 
   test('every cue time is within a 30-minute session', () => {

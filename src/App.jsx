@@ -21,7 +21,7 @@ import { createCueSchedulerState, getDueCues, resetCueScheduler } from './domain
 import { createSessionState, sessionReducer } from './domain/session.js';
 import {
   STORAGE_KEYS,
-  cleanStoredExamples,
+  cleanStoredExamplesOnce,
   deletePreset,
   deleteSession,
   readJson,
@@ -30,7 +30,7 @@ import {
   seedDefaultPresets,
   writeJson,
 } from './domain/storage.js';
-import { DEFAULT_PRESETS } from './domain/presets.js';
+import { DEFAULT_PRESETS, presetDurationSeconds } from './domain/presets.js';
 
 const SESSION_DURATION_SECONDS = 24 * 60;
 
@@ -47,7 +47,7 @@ export function App() {
   const [theme, setTheme] = useState('dim');
   const [cues, setCues] = useState(DEFAULT_CUES);
   const [selectedCueId, setSelectedCueId] = useState('forest');
-  const [initialStorage] = useState(() => cleanStoredExamples(window.localStorage));
+  const [initialStorage] = useState(() => cleanStoredExamplesOnce(window.localStorage));
   const [presets, setPresets] = useState(() => seedDefaultPresets(window.localStorage, DEFAULT_PRESETS));
   const [sessions, setSessions] = useState(() => initialStorage.sessions);
   const [loadedPreset, setLoadedPreset] = useState(null);
@@ -135,17 +135,10 @@ export function App() {
 
   useEffect(() => {
     if (session.status !== 'complete') return;
-    const next = saveSession(window.localStorage, {
-      id: crypto.randomUUID(),
-      name: selectedCue?.name ? `Sesion con ${selectedCue.name}` : 'Sesion completada',
-      duration: `${Math.round(session.durationSeconds / 60)} min`,
-      when: `Hoy, ${nowLabel()}`,
-      color: selectedCue?.color ?? '#f6a133',
-    });
-    setSessions(next);
+    persistSession(session.durationSeconds);
     audioRegistry.current.stopAll();
     schedulerState.current = resetCueScheduler();
-    setNotice('Sesion guardada en Recordar');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.status, session.durationSeconds, selectedCue]);
 
   useEffect(() => {
@@ -222,6 +215,18 @@ export function App() {
     setCuesWithHistory((current) => updateCue(current, selectedCueId, normalizedUpdates));
   }
 
+  function persistSession(seconds) {
+    const next = saveSession(window.localStorage, {
+      id: crypto.randomUUID(),
+      name: selectedCue?.name ? `Sesion con ${selectedCue.name}` : 'Sesion completada',
+      duration: `${Math.round(seconds / 60)} min`,
+      when: `Hoy, ${nowLabel()}`,
+      color: selectedCue?.color ?? '#f6a133',
+    });
+    setSessions(next);
+    setNotice('Sesion guardada en Recordar');
+  }
+
   function handleSavePreset(name) {
     const id = loadedPreset?.id ?? crypto.randomUUID();
     const presetName = name ?? loadedPreset?.name ?? 'Preset Sadhana';
@@ -229,6 +234,7 @@ export function App() {
       id,
       name: presetName,
       createdAt: new Date().toISOString(),
+      durationSeconds: session.durationSeconds,
       cues,
     });
     setPresets(next);
@@ -276,9 +282,12 @@ export function App() {
 
   function handleLoadPreset(preset) {
     if (!preset.cues?.length) return;
+    const durationSeconds = presetDurationSeconds(preset);
     setCuesWithHistory(preset.cues);
     setSelectedCueId(preset.cues[0].id);
     setLoadedPreset({ id: preset.id, name: preset.name });
+    dispatchSession({ type: 'stop' });
+    dispatchSession({ type: 'setDuration', durationSeconds });
     setActiveMode('practice');
     setNotice(`Preset cargado: ${preset.name}`);
   }
@@ -335,11 +344,6 @@ export function App() {
     writeJson(window.localStorage, STORAGE_KEYS.showSoundNames, value);
   }
 
-  function handleTriggerCue(cue) {
-    setSelectedCueId(cue.id);
-    audioRegistry.current.playCue(cue, { volumeScale: masterVolume / 100, muted });
-  }
-
   function handleSeek(seconds) {
     if (seconds < session.elapsedSeconds) {
       const played = schedulerState.current.playedCueIds;
@@ -365,15 +369,7 @@ export function App() {
     onResume() { dispatchSession({ type: 'resume', now: Date.now() }); },
     onStop() {
       if (session.elapsedSeconds >= 60) {
-        const next = saveSession(window.localStorage, {
-          id: crypto.randomUUID(),
-          name: selectedCue?.name ? `Sesion con ${selectedCue.name}` : 'Sesion completada',
-          duration: `${Math.round(session.elapsedSeconds / 60)} min`,
-          when: `Hoy, ${nowLabel()}`,
-          color: selectedCue?.color ?? '#f6a133',
-        });
-        setSessions(next);
-        setNotice('Sesion guardada en Recordar');
+        persistSession(session.elapsedSeconds);
       }
       dispatchSession({ type: 'stop' });
       audioRegistry.current.stopAll();
@@ -403,6 +399,7 @@ export function App() {
   const cueInspector = (
     <CueInspector
       cue={selectedCue}
+      durationSeconds={session.durationSeconds}
       onChange={updateSelectedCue}
       onPreview={(cue) => audioRegistry.current.playCue(cue, {
         volumeScale: masterVolume / 100,
