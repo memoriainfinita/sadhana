@@ -1,16 +1,22 @@
 import { Settings, SunMedium, Volume2 } from 'lucide-react';
 import { ModeTabs } from './ModeTabs.jsx';
 
-function NamasteMark() {
+function BrandMark() {
   return (
     <svg viewBox="0 0 40 40" role="img" aria-label="Sadhana">
-      <path d="M18.9 7.8c-3.1 3.1-5.3 7.6-6.2 12.7-.6 3.6.4 7.2 2.8 9.9l4.5 5" />
-      <path d="M21.1 7.8c3.1 3.1 5.3 7.6 6.2 12.7.6 3.6-.4 7.2-2.8 9.9l-4.5 5" />
-      <path d="M17.5 13.5 15 25.6" />
-      <path d="m22.5 13.5 2.5 12.1" />
-      <path d="M15.1 22.1c-2.6 2.3-2.8 5.5-.4 8.4" />
-      <path d="M24.9 22.1c2.6 2.3 2.8 5.5.4 8.4" />
-      <path d="M20 7.8v27.6" />
+      <text
+        x="20"
+        y="21"
+        fontFamily="Segoe UI, Helvetica, Arial, sans-serif"
+        fontSize="28"
+        fontWeight="700"
+        fill="currentColor"
+        stroke="none"
+        textAnchor="middle"
+        dominantBaseline="central"
+      >
+        S
+      </text>
     </svg>
   );
 }
@@ -21,7 +27,7 @@ export function AppShell({ activeMode, onModeChange, activePanel, onPanelChange,
       <header className="topbar">
         <div className="brand" aria-label="Sadhana">
           <div className="brand-mark" aria-hidden="true">
-            <NamasteMark />
+            <BrandMark />
           </div>
           <span>Sadhana</span>
         </div>
