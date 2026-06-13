@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Plus, Search, Undo2 } from 'lucide-react';
 import { formatClockTime, sortCuesByTime } from '../domain/cues.js';
 import { createTimelineTicks } from '../domain/timeline.js';
+import { TrackClip } from './TrackClip.jsx';
 
 export function Timeline({
   cues,
@@ -10,6 +11,8 @@ export function Timeline({
   elapsedSeconds,
   onSelectCue,
   onMoveCue,
+  onResizeCue,
+  onFadeCue,
   onSeek,
   onAddCue,
   onUndo,
@@ -134,28 +137,50 @@ export function Timeline({
 
       <div className="tracks">
         {visibleCues.map((cue) => (
-          <button
+          <TrackRow
             key={cue.id}
-            className={cue.id === selectedCueId ? 'track-row selected' : 'track-row'}
-            type="button"
-            onClick={() => onSelectCue(cue.id)}
-          >
-            <div className="track-line">
-              <div
-                className="track-clip"
-                style={{
-                  left: `${(cue.time / durationSeconds) * 100}%`,
-                  width: `${Math.max(10, (cue.duration / durationSeconds) * 100)}%`,
-                  '--cue-color': cue.color,
-                }}
-              >
-                <span>{formatClockTime(cue.time)}</span>
-                <strong>{cue.name}</strong>
-              </div>
-            </div>
-          </button>
+            cue={cue}
+            selected={cue.id === selectedCueId}
+            durationSeconds={durationSeconds}
+            onSelectCue={onSelectCue}
+            onResizeCue={onResizeCue}
+            onFadeCue={onFadeCue}
+          />
         ))}
       </div>
     </section>
+  );
+}
+
+function TrackRow({ cue, selected, durationSeconds, onSelectCue, onResizeCue, onFadeCue }) {
+  const lineRef = useRef(null);
+
+  function handleKeyDown(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelectCue(cue.id);
+    }
+  }
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      className={selected ? 'track-row selected' : 'track-row'}
+      onClick={() => onSelectCue(cue.id)}
+      onKeyDown={handleKeyDown}
+    >
+      <div className="track-line" ref={lineRef}>
+        <TrackClip
+          cue={cue}
+          durationSeconds={durationSeconds}
+          selected={selected}
+          trackLineRef={lineRef}
+          onSelect={() => onSelectCue(cue.id)}
+          onResizeCue={onResizeCue}
+          onFadeCue={onFadeCue}
+        />
+      </div>
+    </div>
   );
 }
