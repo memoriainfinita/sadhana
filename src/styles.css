@@ -711,7 +711,6 @@ p {
   position: absolute;
   top: 9px;
   height: 30px;
-  min-width: 92px;
   border-radius: 5px;
   background: color-mix(in srgb, var(--cue-color) 24%, transparent);
   border: 1px solid color-mix(in srgb, var(--cue-color) 58%, transparent);
@@ -735,6 +734,83 @@ p {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 12px;
+}
+
+.track-clip.selected {
+  border-color: color-mix(in srgb, var(--cue-color) 90%, transparent);
+}
+
+.clip-ramp-in,
+.clip-ramp-out {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.clip-ramp-in {
+  left: 0;
+  background: linear-gradient(to right, transparent, color-mix(in srgb, var(--cue-color) 40%, transparent));
+}
+
+.clip-ramp-out {
+  right: 0;
+  background: linear-gradient(to left, transparent, color-mix(in srgb, var(--cue-color) 40%, transparent));
+}
+
+.track-clip span,
+.track-clip strong {
+  position: relative;
+  z-index: 1;
+}
+
+.clip-resize-handle,
+.clip-fade-in-handle,
+.clip-fade-out-handle {
+  position: absolute;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  touch-action: none;
+}
+
+.track-clip:hover .clip-resize-handle,
+.track-clip:hover .clip-fade-in-handle,
+.track-clip:hover .clip-fade-out-handle,
+.track-clip.dragging .clip-resize-handle,
+.track-clip.dragging .clip-fade-in-handle,
+.track-clip.dragging .clip-fade-out-handle {
+  opacity: 1;
+}
+
+.clip-resize-handle {
+  top: 14px;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  cursor: ew-resize;
+  background: color-mix(in srgb, var(--cue-color) 70%, transparent);
+}
+
+.clip-fade-in-handle {
+  top: 0;
+  left: 0;
+  width: 14px;
+  height: 14px;
+  cursor: ew-resize;
+  background: color-mix(in srgb, var(--cue-color) 70%, transparent);
+  border-bottom-right-radius: 4px;
+}
+
+.clip-fade-out-handle {
+  top: 0;
+  right: 0;
+  width: 14px;
+  height: 14px;
+  cursor: ew-resize;
+  background: color-mix(in srgb, var(--cue-color) 70%, transparent);
+  border-bottom-left-radius: 4px;
 }
 
 .cue-inspector {
