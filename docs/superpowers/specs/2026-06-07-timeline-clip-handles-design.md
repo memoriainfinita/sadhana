@@ -16,7 +16,7 @@ Fade ramps (shaded overlays) are always visible inside the clip. Handles appear 
 
 ### New component: `TrackClip.jsx`
 
-Extracted from the `.tracks` section of `Timeline.jsx`. Encapsulates all clip drag logic and visual state.
+Extracted from the `.track-clip` of `Timeline.jsx`. The real DOM hierarchy is three levels: `.track-row` > `.track-line` > `.track-clip`. `TrackClip` renders the clip and owns all drag logic and visual state.
 
 **Props:**
 ```js
@@ -24,12 +24,14 @@ Extracted from the `.tracks` section of `Timeline.jsx`. Encapsulates all clip dr
   cue,             // full cue object
   durationSeconds, // total preset duration
   selected,        // boolean
-  trackRef,        // ref to .tracks container (for coordinate math)
+  trackLineRef,    // ref to THIS row's .track-line (for coordinate math)
   onSelect,        // () => void
   onResizeCue,     // (id, newDuration) => void
   onFadeCue,       // (id, { fadeIn?, fadeOut? }) => void
 }
 ```
+
+**Coordinate container:** px→seconds conversion uses the `.track-line` rect, not `.tracks`. `.track-row` has `padding: 0 30px` (styles.css), so `.tracks` width includes 60px of padding that does not represent time. `.track-line` is the element whose full width maps to `durationSeconds`. The ref is per-row (created inside the row `.map()` or via a callback ref), not a single shared container ref.
 
 **Local state:**
 ```js
@@ -41,18 +43,19 @@ localFadeOut:  number   // mirrors cue.fadeOut during drag
 
 **Drag origin ref** (not state — avoids re-renders):
 ```js
-dragOrigin = useRef({ startX: 0, startDuration: 0, startFadeIn: 0, startFadeOut: 0 })
+dragOrigin = useRef({ startX: 0, startDuration: 0, startFadeIn: 0, startFadeOut: 0, lineWidth: 0 })
 ```
-Populated on `pointerDown` with `event.clientX` and the cue's current values. Read on every `pointerMove` to compute deltas.
+Populated on `pointerDown` with `event.clientX`, the cue's current values, and `trackLineRef.current.getBoundingClientRect().width` (captured once at drag start). Read on every `pointerMove` to compute deltas — no further `getBoundingClientRect` calls during the drag.
 
 Local state (`localDuration`, `localFadeIn`, `localFadeOut`) is initialized from `cue` on `pointerDown` and cleared on `pointerUp`/`pointerCancel`. On `pointerUp`, the relevant callback is called with the final value.
 
 ### Changes to `Timeline.jsx`
 
 - `track-row` changes from `<button>` to `<div role="button" tabIndex={0}>` with `onClick` and `onKeyDown` (Enter/Space) — required to allow nested interactive elements (div-based handles).
-- `.track-clip` content is replaced by `<TrackClip ... />`.
+- The `.track-clip` (currently rendered inline inside `.track-line`) is replaced by `<TrackClip ... />`. The `.track-line` wrapper stays.
+- The clip width drops the `Math.max(10, ...)` floor: `width: (cue.duration / durationSeconds) * 100%`. So the clip's right edge corresponds exactly to `time + duration`, which the resize handle and fade ramps depend on.
 - Two new props added to `Timeline`: `onResizeCue`, `onFadeCue`.
-- A `tracksRef` is added to the `.tracks` container and passed to each `TrackClip`.
+- Each row gets its own `.track-line` ref (callback ref or per-row ref), passed to that row's `TrackClip` as `trackLineRef`. No shared `tracksRef`.
 
 ### Changes to `App.jsx`
 
@@ -79,10 +82,9 @@ Three `<div>` elements inside `.track-clip`, each with `onPointerDown`. Pointer 
 ### Resize handle (`.clip-resize-handle`)
 - Position: `right: 0`, full height, ~8px wide
 - Cursor: `ew-resize`
-- Drag calculation:
+- Drag calculation (`lineWidth` and `startX` captured in `dragOrigin` at pointerDown):
   ```
-  rect = trackRef.current.getBoundingClientRect()
-  deltaSeconds = (event.clientX - startX) / rect.width * durationSeconds
+  deltaSeconds = (event.clientX - startX) / lineWidth * durationSeconds
   newDuration = clamp(startDuration + deltaSeconds, 5, durationSeconds - cue.time)
   ```
 
@@ -91,7 +93,7 @@ Three `<div>` elements inside `.track-clip`, each with `onPointerDown`. Pointer 
 - Cursor: `ew-resize`
 - Drag right increases fadeIn:
   ```
-  deltaSeconds = (event.clientX - startX) / rect.width * durationSeconds
+  deltaSeconds = (event.clientX - startX) / lineWidth * durationSeconds
   newFadeIn = clamp(startFadeIn + deltaSeconds, 0, localDuration - localFadeOut)
   ```
 
@@ -100,7 +102,7 @@ Three `<div>` elements inside `.track-clip`, each with `onPointerDown`. Pointer 
 - Cursor: `ew-resize`
 - Drag left increases fadeOut:
   ```
-  deltaSeconds = -(event.clientX - startX) / rect.width * durationSeconds
+  deltaSeconds = -(event.clientX - startX) / lineWidth * durationSeconds
   newFadeOut = clamp(startFadeOut + deltaSeconds, 0, localDuration - localFadeIn)
   ```
 
@@ -151,6 +153,8 @@ The resize handle (right edge) and fadeOut handle (top-right corner) share the r
 .clip-fade-out-handle            /* top-right corner drag zone */
 .track-clip.dragging             /* applied during any drag — keeps handles visible */
 ```
+
+`.track-clip { min-width: 92px }` is removed (or set to a small value like the handle widths) so the clip's rendered width equals `(duration / durationSeconds) * 100%`. With min-width in place, short cues would render wider than their real duration and the right-edge resize handle would not sit at `time + duration`. The clip text already uses `overflow: hidden` + ellipsis, so thin clips degrade gracefully.
 
 **Z-index stacking order** (lowest to highest inside `.track-clip`):
 1. Ramp divs (`z-index: 0`, `pointer-events: none`) — always below everything
