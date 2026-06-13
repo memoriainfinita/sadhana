@@ -1141,6 +1141,18 @@ p {
   cursor: pointer;
 }
 
+.playback-instruction {
+  flex: 1;
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--accent-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .playback-time {
   display: flex;
   align-items: center;

@@ -118,6 +118,24 @@ export function updateCue(cues, cueId, updates) {
   return cues.map((cue) => (cue.id === cueId ? { ...cue, ...updates } : cue));
 }
 
+export function getActiveInstruction(cues, elapsedSeconds) {
+  // A cue's instruction is active during [time, time + instructionDuration).
+  // On overlap, the cue with the greatest time wins (the most recent one).
+  let active = '';
+  let activeTime = -Infinity;
+  for (const cue of cues) {
+    const instruction = cue.instruction ?? '';
+    if (!instruction) continue;
+    const start = cue.time;
+    const end = start + (cue.instructionDuration ?? 0);
+    if (elapsedSeconds >= start && elapsedSeconds < end && start >= activeTime) {
+      active = instruction;
+      activeTime = start;
+    }
+  }
+  return active;
+}
+
 export function clampCueTime(seconds, durationSeconds) {
   return Math.min(Math.max(0, Number(seconds) || 0), durationSeconds);
 }

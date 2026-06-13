@@ -7,7 +7,7 @@ function formatTime(seconds) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export function PlaybackBar({ session, onStart, onPause, onResume, onStop, onNudge }) {
+export function PlaybackBar({ session, instruction, onStart, onPause, onResume, onStop, onNudge }) {
   const isRunning = session.status === 'running';
   const isPaused = session.status === 'paused';
   const isIdle = session.status === 'idle';
@@ -66,6 +66,8 @@ export function PlaybackBar({ session, onStart, onPause, onResume, onStop, onNud
         <span className="playback-separator">/</span>
         <span className="playback-remaining">{formatTime(remaining)}</span>
       </div>
+
+      {instruction && <p className="playback-instruction">{instruction}</p>}
     </div>
   );
 }

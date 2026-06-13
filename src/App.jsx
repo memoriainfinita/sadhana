@@ -13,6 +13,7 @@ import {
   clampCueTime,
   createCue,
   duplicateCue,
+  getActiveInstruction,
   getCueById,
   removeCue,
   updateCue,
@@ -526,6 +527,7 @@ export function App() {
             </div>
             <PlaybackBar
               session={session}
+              instruction={getActiveInstruction(cues, session.elapsedSeconds)}
               onStart={timerPanelProps.onStart}
               onPause={timerPanelProps.onPause}
               onResume={timerPanelProps.onResume}

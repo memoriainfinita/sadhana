@@ -6,6 +6,7 @@ import {
   createCue,
   duplicateCue,
   formatClockTime,
+  getActiveInstruction,
   getCueById,
   removeCue,
   sortCuesByTime,
@@ -105,5 +106,39 @@ describe('cues domain', () => {
     const cues = updateCue(DEFAULT_CUES, 'start', { instruction: 'Exhala', instructionDuration: 6 });
     expect(getCueById(cues, 'start')).toMatchObject({ instruction: 'Exhala', instructionDuration: 6 });
     expect(getCueById(cues, 'rain')).not.toHaveProperty('instruction', 'Exhala');
+  });
+
+  describe('getActiveInstruction', () => {
+    const cues = [
+      { id: 'a', time: 0, instruction: 'Respira', instructionDuration: 10 },
+      { id: 'b', time: 30, instruction: 'Relaja', instructionDuration: 5 },
+      { id: 'c', time: 60, instruction: '', instructionDuration: 5 },
+    ];
+
+    test('returns the instruction whose window covers the elapsed time', () => {
+      expect(getActiveInstruction(cues, 3)).toBe('Respira');
+      expect(getActiveInstruction(cues, 31)).toBe('Relaja');
+    });
+
+    test('returns empty string outside any window', () => {
+      expect(getActiveInstruction(cues, 20)).toBe('');
+      expect(getActiveInstruction(cues, 100)).toBe('');
+    });
+
+    test('window is half-open: end second is no longer active', () => {
+      expect(getActiveInstruction(cues, 10)).toBe('');
+    });
+
+    test('ignores cues with empty instruction', () => {
+      expect(getActiveInstruction(cues, 62)).toBe('');
+    });
+
+    test('on overlap returns the cue with the greatest time', () => {
+      const overlapping = [
+        { id: 'a', time: 0, instruction: 'Primera', instructionDuration: 60 },
+        { id: 'b', time: 30, instruction: 'Segunda', instructionDuration: 60 },
+      ];
+      expect(getActiveInstruction(overlapping, 40)).toBe('Segunda');
+    });
   });
 });
