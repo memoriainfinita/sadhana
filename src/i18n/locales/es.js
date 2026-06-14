@@ -62,6 +62,7 @@ export default {
     duration: 'Duracion', min: 'min',
     searchLabel: 'Buscar cue', searchPlaceholder: 'Nombre de cue',
     cueAria: 'Cue {name}',
+    playheadAria: 'Posicion de reproduccion',
   },
 
   inspector: {

@@ -49,6 +49,7 @@ export default {
     duration: 'Duration', min: 'min',
     searchLabel: 'Search cue', searchPlaceholder: 'Cue name',
     cueAria: 'Cue {name}',
+    playheadAria: 'Playback position',
   },
   inspector: {
     aside: 'Cue editor', heading: 'Cue',
