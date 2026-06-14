@@ -3,6 +3,7 @@ import { Plus, Search, Undo2 } from 'lucide-react';
 import { formatClockTime, sortCuesByTime } from '../domain/cues.js';
 import { createTimelineTicks } from '../domain/timeline.js';
 import { TrackClip } from './TrackClip.jsx';
+import { useT } from '../i18n/useT.js';
 
 export function Timeline({
   cues,
@@ -19,6 +20,7 @@ export function Timeline({
   canUndo,
   onDurationChange,
 }) {
+  const t = useT();
   const sorted = sortCuesByTime(cues);
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -72,16 +74,16 @@ export function Timeline({
   }
 
   return (
-    <section className="timeline-panel" aria-label="Linea de tiempo">
+    <section className="timeline-panel" aria-label={t('timeline.panelLabel')}>
       <div className="timeline-header">
-        <h2>Linea de tiempo</h2>
+        <h2>{t('timeline.heading')}</h2>
         <div className="timeline-header-actions">
-          <button type="button" title="Añadir nueva cue en la posicion actual" onClick={onAddCue}><Plus size={16} />Añadir</button>
-          <button type="button" className="icon-button small" aria-label="Deshacer" title="Deshacer ultimo cambio" onClick={onUndo} disabled={!canUndo}><Undo2 size={15} /></button>
-          <button type="button" className="icon-button small" aria-label="Buscar" title="Buscar cue por nombre" onClick={() => setSearchOpen((open) => !open)}><Search size={15} /></button>
+          <button type="button" title={t('timeline.addTitle')} onClick={onAddCue}><Plus size={16} />{t('timeline.add')}</button>
+          <button type="button" className="icon-button small" aria-label={t('timeline.undo')} title={t('timeline.undoTitle')} onClick={onUndo} disabled={!canUndo}><Undo2 size={15} /></button>
+          <button type="button" className="icon-button small" aria-label={t('timeline.search')} title={t('timeline.searchTitle')} onClick={() => setSearchOpen((open) => !open)}><Search size={15} /></button>
         </div>
         <label className="duration-control">
-          <span>Duracion</span>
+          <span>{t('timeline.duration')}</span>
           <input
             type="number"
             min="1"
@@ -89,7 +91,7 @@ export function Timeline({
             value={Math.round(durationSeconds / 60)}
             onChange={(event) => onDurationChange(Number(event.target.value))}
           />
-          <span>min</span>
+          <span>{t('timeline.min')}</span>
         </label>
       </div>
 
@@ -107,7 +109,7 @@ export function Timeline({
             className={markerClassName(cue)}
             style={{ left: `${markerPosition(cue)}%`, '--cue-color': cue.color }}
             type="button"
-            aria-label={`Cue ${cue.name}`}
+            aria-label={t('timeline.cueAria', { name: cue.name })}
             onPointerDown={(e) => handleMarkerPointerDown(cue, e)}
             onPointerMove={(e) => handleMarkerPointerMove(cue, e)}
             onPointerUp={handleMarkerPointerUp}
@@ -130,8 +132,8 @@ export function Timeline({
 
       {searchOpen && (
         <label className="timeline-search">
-          Buscar cue
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nombre de cue" />
+          {t('timeline.searchLabel')}
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t('timeline.searchPlaceholder')} />
         </label>
       )}
 
