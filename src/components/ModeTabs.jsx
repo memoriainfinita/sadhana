@@ -18,6 +18,7 @@ export function ModeTabs({ activeMode, onModeChange }) {
             key={mode.id}
             className={activeMode === mode.id ? 'mode-tab active' : 'mode-tab'}
             type="button"
+            aria-current={activeMode === mode.id ? 'page' : undefined}
             onClick={() => onModeChange(mode.id)}
           >
             <Icon size={18} />
