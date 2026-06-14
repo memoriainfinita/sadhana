@@ -235,7 +235,7 @@ export function App() {
     });
     setPresets(next);
     setLoadedPreset({ id, name: presetName });
-    setNotice('Preset guardado');
+    setNotice(t('notices.presetSaved'));
   }
 
   function handleNudge(seconds) {
@@ -247,7 +247,7 @@ export function App() {
     const cue = createCue({ atTime: session.elapsedSeconds, durationSeconds: session.durationSeconds });
     setCuesWithHistory((current) => [...current, cue]);
     setSelectedCueId(cue.id);
-    setNotice('Cue añadida');
+    setNotice(t('notices.cueAdded'));
   }
 
   function handleDuplicateCue() {
@@ -255,14 +255,14 @@ export function App() {
     const cue = duplicateCue(selectedCue, { durationSeconds: session.durationSeconds });
     setCuesWithHistory((current) => [...current, cue]);
     setSelectedCueId(cue.id);
-    setNotice('Cue duplicada');
+    setNotice(t('notices.cueDuplicated'));
   }
 
   function handleDeleteCue() {
     const result = removeCue(cues, selectedCueId);
     setCuesWithHistory(result.cues);
     setSelectedCueId(result.selectedCueId);
-    setNotice('Cue eliminada');
+    setNotice(t('notices.cueDeleted'));
   }
 
   function handleUndoCueChange() {
@@ -273,7 +273,7 @@ export function App() {
     if (!getCueById(previous, selectedCueId)) {
       setSelectedCueId(previous[0]?.id ?? null);
     }
-    setNotice('Cambio deshecho');
+    setNotice(t('notices.changeUndone'));
   }
 
   function handleLoadPreset(preset) {
@@ -285,17 +285,17 @@ export function App() {
     dispatchSession({ type: 'stop' });
     dispatchSession({ type: 'setDuration', durationSeconds });
     setActiveMode('practice');
-    setNotice(`Preset cargado: ${preset.name}`);
+    setNotice(t('notices.presetLoaded', { name: resolvePresetName(preset, t) }));
   }
 
   function handleDeletePreset(presetId) {
     setPresets(deletePreset(window.localStorage, presetId));
-    setNotice('Preset eliminado');
+    setNotice(t('notices.presetDeleted'));
   }
 
   function handleDeleteSession(sessionId) {
     setSessions(deleteSession(window.localStorage, sessionId));
-    setNotice('Sesion eliminada');
+    setNotice(t('notices.sessionDeleted'));
   }
 
   function handleRepeatSession(item) {
@@ -312,13 +312,13 @@ export function App() {
   function handleDurationChange(minutes) {
     const durationSeconds = Math.max(1, Number(minutes) || 1) * 60;
     dispatchSession({ type: 'setDuration', durationSeconds });
-    setNotice('Duracion actualizada');
+    setNotice(t('notices.durationUpdated'));
   }
 
   function handleExportData() {
     const payload = JSON.stringify({ presets, sessions }, null, 2);
     navigator.clipboard?.writeText(payload);
-    setNotice('Datos copiados al portapapeles');
+    setNotice(t('notices.dataCopied'));
   }
 
   function handleImportData(raw) {
@@ -330,9 +330,9 @@ export function App() {
       writeJson(window.localStorage, STORAGE_KEYS.sessions, nextSessions);
       setPresets(nextPresets);
       setSessions(nextSessions);
-      setNotice('Datos importados');
+      setNotice(t('notices.dataImported'));
     } catch {
-      setNotice('JSON no valido');
+      setNotice(t('notices.invalidJson'));
     }
   }
 
@@ -507,18 +507,18 @@ export function App() {
               <input
                 className="preset-name-input"
                 type="text"
-                placeholder="Nombre del preset"
+                placeholder={t('presetBar.placeholder')}
                 value={loadedPreset?.name ?? ''}
                 onChange={(e) => setLoadedPreset((p) => ({ id: p?.id ?? null, name: e.target.value }))}
-                aria-label="Nombre del preset"
+                aria-label={t('presetBar.nameAria')}
               />
               <button
                 type="button"
                 className="preset-name-save"
-                title="Guardar preset con las cues actuales"
+                title={t('presetBar.saveTitle')}
                 onClick={() => handleSavePreset(loadedPreset?.name)}
               >
-                Guardar preset
+                {t('presetBar.save')}
               </button>
             </div>
             <PlaybackBar
