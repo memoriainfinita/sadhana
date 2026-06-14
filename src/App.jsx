@@ -67,6 +67,7 @@ export function App() {
   const cueHistory = useRef([]);
   const schedulerState = useRef(createCueSchedulerState());
   const shortcutsRef = useRef({});
+  const lastPanelTrigger = useRef(null);
 
   const selectedCue = useMemo(() => getCueById(cues, selectedCueId), [cues, selectedCueId]);
 
@@ -87,6 +88,13 @@ export function App() {
   useEffect(() => {
     audioRegistry.current.applyMasterVolume(masterVolume / 100, muted);
   }, [masterVolume, muted]);
+
+  useEffect(() => {
+    // When any panel closes, return focus to the button that opened it.
+    if (activePanel === null && lastPanelTrigger.current) {
+      lastPanelTrigger.current.focus();
+    }
+  }, [activePanel]);
 
   useEffect(() => {
     const r = parseInt(accentColor.slice(1, 3), 16);
@@ -147,10 +155,18 @@ export function App() {
 
   useEffect(() => {
     function handleKey(event) {
+      const { session, activeMode, zenMode, activePanel, timerPanelProps, handleNudge, setActiveMode, setZenMode, setActivePanel } = shortcutsRef.current;
+
+      // Escape closes an open panel from anywhere, including form controls inside it.
+      if (event.key === 'Escape') {
+        if (activePanel) { setActivePanel(null); return; }
+        if (zenMode) { setZenMode(false); return; }
+        return;
+      }
+
       const tag = event.target.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
 
-      const { session, activeMode, zenMode, timerPanelProps, handleNudge, setActiveMode, setZenMode } = shortcutsRef.current;
       const inPractice = activeMode === 'practice';
 
       switch (event.key) {
@@ -175,9 +191,6 @@ export function App() {
         case 'F':
           if (!inPractice || zenMode) return;
           setZenMode(true);
-          break;
-        case 'Escape':
-          if (zenMode) setZenMode(false);
           break;
         case '1':
           setActiveMode('practice');
@@ -341,6 +354,11 @@ export function App() {
     writeJson(window.localStorage, STORAGE_KEYS.showSoundNames, value);
   }
 
+  function handlePanelChange(next, triggerEl) {
+    if (next && triggerEl) lastPanelTrigger.current = triggerEl;
+    setActivePanel(next);
+  }
+
   function handleSeek(seconds) {
     if (seconds < session.elapsedSeconds) {
       const played = schedulerState.current.playedCueIds;
@@ -391,7 +409,7 @@ export function App() {
     onNudge: handleNudge,
   };
 
-  shortcutsRef.current = { session, activeMode, zenMode, timerPanelProps, handleNudge, setActiveMode, setZenMode };
+  shortcutsRef.current = { session, activeMode, zenMode, activePanel, timerPanelProps, handleNudge, setActiveMode, setZenMode, setActivePanel };
 
   const timelinePanel = (
     <Timeline
@@ -448,12 +466,12 @@ export function App() {
       activeMode={activeMode}
       onModeChange={setActiveMode}
       activePanel={activePanel}
-      onPanelChange={setActivePanel}
+      onPanelChange={handlePanelChange}
     >
       {notice && <div className="notice" role="status">{notice}</div>}
       <GlobalPanel
         activePanel={activePanel}
-        onClose={() => setActivePanel(null)}
+        onClose={() => handlePanelChange(null)}
         theme={theme}
         onThemeToggle={() => setTheme((current) => (current === 'dim' ? 'contrast' : 'dim'))}
         accentColor={accentColor}
@@ -475,6 +493,7 @@ export function App() {
             {...timerPanelProps}
             onZen={() => setZenMode(false)}
             zenMode
+            announce
             playingCueName={playingCueName}
             playingInstruction={playingInstruction}
             showSoundNames={showSoundNames}
@@ -488,6 +507,7 @@ export function App() {
             <TimerPanel
               {...timerPanelProps}
               onZen={() => setZenMode(true)}
+              announce={!zenMode}
               presetName={loadedPreset?.name}
               playingCueName={playingCueName}
               playingInstruction={playingInstruction}
