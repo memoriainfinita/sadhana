@@ -10,6 +10,14 @@ export function presetDurationSeconds(preset) {
   return Math.max(60, Math.ceil(lastCueEnd / 60) * 60);
 }
 
+// Default presets are app content (translated by id); user presets show their
+// literal name. t echoes the key back on miss, which is how we detect a user preset.
+export function resolvePresetName(preset, t) {
+  const key = `presets.${preset.id}`;
+  const translated = t(key);
+  return translated === key ? preset.name : translated;
+}
+
 export const DEFAULT_PRESETS = [
   {
     id: 'default-yoga-nidra',
