@@ -1,6 +1,19 @@
 import { describe, expect, test } from 'vitest';
-import { DEFAULT_PRESETS, presetDurationSeconds } from './presets.js';
+import { DEFAULT_PRESETS, presetDurationSeconds, resolvePresetName } from './presets.js';
 import { SOUND_OPTIONS } from './sounds.js';
+
+describe('resolvePresetName', () => {
+  // t stub: returns translated name for known default ids, echoes the key otherwise
+  const t = (key) => (key === 'presets.default-yoga-nidra' ? 'Yoga Nidra' : key);
+
+  test('returns translated name for a default preset id', () => {
+    expect(resolvePresetName({ id: 'default-yoga-nidra', name: 'X' }, t)).toBe('Yoga Nidra');
+  });
+
+  test('falls back to literal name for a user preset (key echoes back)', () => {
+    expect(resolvePresetName({ id: 'abc-123', name: 'Mi preset' }, t)).toBe('Mi preset');
+  });
+});
 
 const REQUIRED_CUE_FIELDS = ['id', 'name', 'sound', 'time', 'duration', 'volume', 'fadeIn', 'fadeOut', 'instruction', 'instructionDuration'];
 const validSounds = new Set(SOUND_OPTIONS.map((o) => o.value));
