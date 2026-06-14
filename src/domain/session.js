@@ -13,6 +13,20 @@ export function getRemainingSeconds(state) {
   return Math.max(0, state.durationSeconds - state.elapsedSeconds);
 }
 
+// Derives display strings for a session card, formatting raw fields with the
+// supplied helpers and falling back to legacy preformatted fields for sessions
+// saved before the raw model. fmtDuration(seconds) and fmtDate(isoString) are
+// passed in so this stays pure (locale lives in the caller).
+export function sessionDisplay(item, t, fmtDuration, fmtDate) {
+  const name = item.cueName ? t('sessions.withCue', { name: item.cueName })
+    : item.name ?? t('sessions.defaultName');
+  const duration = item.durationSeconds != null ? fmtDuration(item.durationSeconds)
+    : item.duration ?? '';
+  const when = item.createdAt ? fmtDate(item.createdAt)
+    : item.when ?? '';
+  return { name, duration, when };
+}
+
 export function sessionReducer(state, action) {
   switch (action.type) {
     case 'setDuration': {
