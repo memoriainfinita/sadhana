@@ -20,6 +20,7 @@ for (const path of audioFiles) {
 }
 
 export const SOUND_OPTION_GROUPS = Object.entries(byGroup).map(([folder, options]) => ({
+  folder,
   group: groupLabel(folder),
   options,
 }));

@@ -1,56 +1,62 @@
 import { Copy, Play, Square, Trash2 } from 'lucide-react';
 import { SOUND_OPTION_GROUPS, formatClockTime } from '../domain/cues.js';
+import { useT } from '../i18n/useT.js';
 
 export function CueInspector({ cue, durationSeconds = 1440, onChange, onPreview, onStopPreview, onDuplicate, onDelete }) {
+  const t = useT();
   if (!cue) return null;
 
   return (
-    <aside className="cue-inspector" aria-label="Editor de cue">
+    <aside className="cue-inspector" aria-label={t('inspector.aside')}>
       <div className="inspector-header">
-        <h2>Cue</h2>
+        <h2>{t('inspector.heading')}</h2>
         <div>
-          <button className="icon-button small" type="button" aria-label="Duplicar cue" title="Duplicar esta cue" onClick={onDuplicate}><Copy size={17} /></button>
-          <button className="icon-button small" type="button" aria-label="Eliminar cue" title="Eliminar esta cue" onClick={onDelete}><Trash2 size={17} /></button>
+          <button className="icon-button small" type="button" aria-label={t('inspector.duplicate')} title={t('inspector.duplicateTitle')} onClick={onDuplicate}><Copy size={17} /></button>
+          <button className="icon-button small" type="button" aria-label={t('inspector.delete')} title={t('inspector.deleteTitle')} onClick={onDelete}><Trash2 size={17} /></button>
         </div>
       </div>
 
       <label>
-        Nombre
+        {t('inspector.name')}
         <input value={cue.name} onChange={(event) => onChange({ name: event.target.value })} />
       </label>
 
       <label>
-        Sonido
+        {t('inspector.sound')}
         <div className="select-row">
           <select value={cue.sound} onChange={(event) => onChange({ sound: event.target.value })}>
-            {SOUND_OPTION_GROUPS.map((group) => (
-              <optgroup key={group.group} label={group.group}>
-                {group.options.map((sound) => (
-                  <option key={sound.value} value={sound.value}>{sound.label}</option>
-                ))}
-              </optgroup>
-            ))}
+            {SOUND_OPTION_GROUPS.map((group) => {
+              const translated = t('sounds.groups.' + group.folder);
+              const shown = translated.startsWith('sounds.groups.') ? group.group : translated;
+              return (
+                <optgroup key={group.folder} label={shown}>
+                  {group.options.map((sound) => (
+                    <option key={sound.value} value={sound.value}>{sound.label}</option>
+                  ))}
+                </optgroup>
+              );
+            })}
           </select>
-          <button type="button" aria-label="Previsualizar sonido" title="Reproducir sonido de esta cue" onClick={() => onPreview(cue)}>
+          <button type="button" aria-label={t('inspector.preview')} title={t('inspector.previewTitle')} onClick={() => onPreview(cue)}>
             <Play size={18} />
           </button>
-          <button type="button" aria-label="Parar preview" title="Parar reproduccion del sonido" onClick={() => onStopPreview(cue)}>
+          <button type="button" aria-label={t('inspector.stopPreview')} title={t('inspector.stopPreviewTitle')} onClick={() => onStopPreview(cue)}>
             <Square size={16} fill="currentColor" />
           </button>
         </div>
       </label>
 
       <label>
-        Instruccion
+        {t('inspector.instruction')}
         <input
           value={cue.instruction ?? ''}
           onChange={(event) => onChange({ instruction: event.target.value })}
-          placeholder="ej. Inhala, Reten, Exhala..."
+          placeholder={t('inspector.instructionPlaceholder')}
         />
       </label>
 
       <label>
-        Visibilidad (s)
+        {t('inspector.visibility')}
         <input
           type="number"
           min="1"
@@ -61,7 +67,7 @@ export function CueInspector({ cue, durationSeconds = 1440, onChange, onPreview,
       </label>
 
       <label>
-        Tiempo
+        {t('inspector.time')}
         <input
           type="range"
           min="0"
@@ -73,7 +79,7 @@ export function CueInspector({ cue, durationSeconds = 1440, onChange, onPreview,
       </label>
 
       <label>
-        Volumen
+        {t('inspector.volume')}
         <input
           type="range"
           min="0"
@@ -86,7 +92,7 @@ export function CueInspector({ cue, durationSeconds = 1440, onChange, onPreview,
 
       <div className="field-grid">
         <label>
-          Dur. (s)
+          {t('inspector.durationField')}
           <input
             type="number"
             min="1"
@@ -96,7 +102,7 @@ export function CueInspector({ cue, durationSeconds = 1440, onChange, onPreview,
           />
         </label>
         <label>
-          Fade in (s)
+          {t('inspector.fadeIn')}
           <input
             type="number"
             min="0"
@@ -106,7 +112,7 @@ export function CueInspector({ cue, durationSeconds = 1440, onChange, onPreview,
           />
         </label>
         <label>
-          Fade out (s)
+          {t('inspector.fadeOut')}
           <input
             type="number"
             min="0"
@@ -118,8 +124,8 @@ export function CueInspector({ cue, durationSeconds = 1440, onChange, onPreview,
       </div>
 
       <label>
-        Notas
-        <textarea value={cue.notes} onChange={(event) => onChange({ notes: event.target.value })} placeholder="Añade notas sobre este cue..." />
+        {t('inspector.notes')}
+        <textarea value={cue.notes} onChange={(event) => onChange({ notes: event.target.value })} placeholder={t('inspector.notesPlaceholder')} />
       </label>
 
     </aside>
