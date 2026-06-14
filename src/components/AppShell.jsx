@@ -27,11 +27,11 @@ export function AppShell({ activeMode, onModeChange, activePanel, onPanelChange,
   return (
     <div className="sadhana-shell">
       <header className="topbar">
-        <div className="brand" aria-label={t('shell.brand')}>
+        <div className="brand">
           <div className="brand-mark" aria-hidden="true">
             <BrandMark label={t('shell.brand')} />
           </div>
-          <span>{t('shell.brand')}</span>
+          <h1 className="brand-title">{t('shell.brand')}</h1>
         </div>
 
         <ModeTabs activeMode={activeMode} onModeChange={onModeChange} />
@@ -42,7 +42,8 @@ export function AppShell({ activeMode, onModeChange, activePanel, onPanelChange,
             type="button"
             aria-label={t('shell.theme')}
             title={t('shell.themeTitle')}
-            onClick={() => onPanelChange(activePanel === 'theme' ? null : 'theme')}
+            aria-expanded={activePanel === 'theme'}
+            onClick={(e) => onPanelChange(activePanel === 'theme' ? null : 'theme', e.currentTarget)}
           >
             <SunMedium size={19} />
           </button>
@@ -51,7 +52,8 @@ export function AppShell({ activeMode, onModeChange, activePanel, onPanelChange,
             type="button"
             aria-label={t('shell.audio')}
             title={t('shell.audioTitle')}
-            onClick={() => onPanelChange(activePanel === 'audio' ? null : 'audio')}
+            aria-expanded={activePanel === 'audio'}
+            onClick={(e) => onPanelChange(activePanel === 'audio' ? null : 'audio', e.currentTarget)}
           >
             <Volume2 size={19} />
           </button>
@@ -60,7 +62,8 @@ export function AppShell({ activeMode, onModeChange, activePanel, onPanelChange,
             type="button"
             aria-label={t('shell.settings')}
             title={t('shell.settingsTitle')}
-            onClick={() => onPanelChange(activePanel === 'settings' ? null : 'settings')}
+            aria-expanded={activePanel === 'settings'}
+            onClick={(e) => onPanelChange(activePanel === 'settings' ? null : 'settings', e.currentTarget)}
           >
             <Settings size={19} />
           </button>
