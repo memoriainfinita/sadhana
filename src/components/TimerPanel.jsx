@@ -8,7 +8,7 @@ function formatRemaining(seconds) {
   return `${String(minutes).padStart(2, '0')}:${String(remainder).padStart(2, '0')}`;
 }
 
-export function TimerPanel({ session, onStart, onPause, onResume, onStop, onNudge, onZen, zenMode = false, presetName, playingCueName, playingInstruction, showSoundNames = true, cues, playingCueId, cuesVisible, onToggleCues, onEditCues }) {
+export function TimerPanel({ session, onStart, onPause, onResume, onStop, onNudge, onZen, zenMode = false, presetName, playingCueName, playingInstruction, showSoundNames = true, announce = false, cues, playingCueId, cuesVisible, onToggleCues, onEditCues }) {
   const t = useT();
   const remaining = getRemainingSeconds(session);
   const isRunning = session.status === 'running';
@@ -31,7 +31,10 @@ export function TimerPanel({ session, onStart, onPause, onResume, onStop, onNudg
       <div className="timer-progress">
         <div className="timer-progress-fill" style={{ width: `${progress}%` }} />
       </div>
-      <div className={`playing-instruction-label${playingInstruction ? ' visible' : ''}`}>
+      <div
+        className={`playing-instruction-label${playingInstruction ? ' visible' : ''}`}
+        aria-live={announce ? 'polite' : undefined}
+      >
         {playingInstruction}
       </div>
       {showSoundNames && (
@@ -65,7 +68,7 @@ export function TimerPanel({ session, onStart, onPause, onResume, onStop, onNudg
         </button>
         {onToggleCues && (
           <div className="timer-cue-actions">
-            <button type="button" className="icon-button small" title={cuesVisible ? t('timer.hideCues') : t('timer.showCues')} onClick={onToggleCues}>
+            <button type="button" className="icon-button small" aria-expanded={cuesVisible} title={cuesVisible ? t('timer.hideCues') : t('timer.showCues')} onClick={onToggleCues}>
               {cuesVisible ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
             </button>
             <button type="button" className="icon-button small" title={t('timer.editCues')} onClick={onEditCues}>
