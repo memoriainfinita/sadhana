@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Plus, Search, Undo2 } from 'lucide-react';
 import { formatClockTime, sortCuesByTime } from '../domain/cues.js';
 import { createTimelineTicks } from '../domain/timeline.js';
+import { stepFromKey } from '../domain/keyboard.js';
 import { TrackClip } from './TrackClip.jsx';
 import { useT } from '../i18n/useT.js';
 
@@ -73,6 +74,18 @@ export function Timeline({
     setPlayheadDragging(false);
   }
 
+  function handlePlayheadKeyDown(event) {
+    const next = stepFromKey(Math.round(elapsedSeconds), event.key, {
+      min: 0,
+      max: durationSeconds,
+      step: 5,
+    });
+    if (next === null) return;
+    event.preventDefault();
+    event.stopPropagation();
+    onSeek(next);
+  }
+
   return (
     <section className="timeline-panel" aria-label={t('timeline.panelLabel')}>
       <div className="timeline-header">
@@ -122,9 +135,17 @@ export function Timeline({
         <div
           className={playheadDragging ? 'playhead dragging' : 'playhead'}
           style={{ left: `${progress}%` }}
+          role="slider"
+          tabIndex={0}
+          aria-label={t('timeline.playheadAria')}
+          aria-valuemin={0}
+          aria-valuemax={durationSeconds}
+          aria-valuenow={Math.round(elapsedSeconds)}
+          aria-valuetext={formatClockTime(Math.round(elapsedSeconds))}
           onPointerDown={handlePlayheadPointerDown}
           onPointerMove={handlePlayheadPointerMove}
           onPointerUp={handlePlayheadPointerUp}
+          onKeyDown={handlePlayheadKeyDown}
         >
           <span>{formatClockTime(elapsedSeconds)}</span>
         </div>
