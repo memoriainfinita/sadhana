@@ -57,6 +57,7 @@ last_updated: 2026-06-13
 - [x] Campo `instruction` en cues — implementado 2026-06-07.
 - [x] Audio scheduling — overlap en seek y fade/volume conflict resueltos 2026-06-07. Precision de timing (250ms) aceptable, no requiere cambio.
 - [ ] i18n: contexto `LanguageContext` + hook `useT()` + objetos `es.js`/`en.js` en `src/i18n/`, toggle en Settings. Afecta todos los componentes.
+- [ ] Auditoria de accesibilidad WCAG (separada de i18n): aria-pressed/aria-current en toggles de modo y paneles, aria-live en timer e instruccion, contraste AA del acento, prefers-reduced-motion, navegacion por teclado del timeline (markers y handles), focus management al abrir paneles y :focus-visible.
 - [x] Accesos de teclado — implementado 2026-06-08.
 - [x] Crear presets basicos de ejemplo — 5 presets implementados 2026-06-08.
 - [x] Timeline track clips redimensionables: arrastrar el borde derecho del clip para cambiar `duration` de la cue, al estilo DAW. Implementado 2026-06-13.
