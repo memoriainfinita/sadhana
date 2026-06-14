@@ -3,6 +3,7 @@ export const STORAGE_KEYS = {
   sessions: 'sadhana-next.sessions',
   showSoundNames: 'sadhana-next.showSoundNames',
   examplesCleaned: 'sadhana-next.examplesCleaned',
+  lang: 'sadhana-next.lang',
 };
 
 const OLD_SAMPLE_IDS = new Set([

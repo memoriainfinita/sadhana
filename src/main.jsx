@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App.jsx';
+import { LanguageProvider } from './i18n/LanguageContext.jsx';
 import './styles.css';
 
 const root = document.getElementById('root');
@@ -8,7 +9,9 @@ const root = document.getElementById('root');
 try {
   createRoot(root).render(
     <React.StrictMode>
-      <App />
+      <LanguageProvider>
+        <App />
+      </LanguageProvider>
     </React.StrictMode>
   );
 } catch (error) {
