@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronUp, Maximize2, Minimize2, Pause, Pencil, Play, RotateCcw, RotateCw, Square } from 'lucide-react';
 import { getRemainingSeconds } from '../domain/session.js';
+import { useT } from '../i18n/useT.js';
 
 function formatRemaining(seconds) {
   const minutes = Math.floor(seconds / 60);
@@ -8,6 +9,7 @@ function formatRemaining(seconds) {
 }
 
 export function TimerPanel({ session, onStart, onPause, onResume, onStop, onNudge, onZen, zenMode = false, presetName, playingCueName, playingInstruction, showSoundNames = true, cues, playingCueId, cuesVisible, onToggleCues, onEditCues }) {
+  const t = useT();
   const remaining = getRemainingSeconds(session);
   const isRunning = session.status === 'running';
   const isPaused = session.status === 'paused';
@@ -17,10 +19,10 @@ export function TimerPanel({ session, onStart, onPause, onResume, onStop, onNudg
     : 0;
 
   return (
-    <section className="timer-panel" aria-label="Temporizador de practica">
+    <section className="timer-panel" aria-label={t('timer.panelLabel')}>
       <div className="timer-panel-header">
         <span className="duration-label">{Math.round(session.durationSeconds / 60)} min</span>
-        <button className="icon-button small" type="button" onClick={onZen} aria-label={zenMode ? 'Salir del modo zen' : 'Modo zen'} title={zenMode ? 'Salir del modo zen' : 'Modo zen — pantalla completa'}>
+        <button className="icon-button small" type="button" onClick={onZen} aria-label={zenMode ? t('timer.zenExit') : t('timer.zenEnter')} title={zenMode ? t('timer.zenExitTitle') : t('timer.zenEnterTitle')}>
           {zenMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
         </button>
       </div>
@@ -38,35 +40,35 @@ export function TimerPanel({ session, onStart, onPause, onResume, onStop, onNudg
         </div>
       )}
       <div className="timer-controls">
-        <button className="round-button secondary" type="button" onClick={() => onNudge(-15)} aria-label="Retroceder 15 segundos" title="Retroceder 15 segundos">
+        <button className="round-button secondary" type="button" onClick={() => onNudge(-15)} aria-label={t('timer.back')} title={t('timer.back')}>
           <RotateCcw size={20} />
           <span>15</span>
         </button>
         {isRunning ? (
-          <button className="round-button primary" type="button" onClick={onPause} aria-label="Pausar sesion" title="Pausar sesion">
+          <button className="round-button primary" type="button" onClick={onPause} aria-label={t('timer.pauseSession')} title={t('timer.pauseSession')}>
             <Pause size={34} fill="currentColor" />
           </button>
         ) : (
-          <button className="round-button primary" type="button" onClick={isPaused ? onResume : onStart} aria-label="Iniciar o reanudar sesion" title={isPaused ? 'Reanudar sesion' : 'Iniciar sesion'}>
+          <button className="round-button primary" type="button" onClick={isPaused ? onResume : onStart} aria-label={t('timer.startResume')} title={isPaused ? t('timer.resumeTitle') : t('timer.startTitle')}>
             <Play size={32} fill="currentColor" />
           </button>
         )}
-        <button className="round-button secondary" type="button" onClick={() => onNudge(15)} aria-label="Avanzar 15 segundos" title="Avanzar 15 segundos">
+        <button className="round-button secondary" type="button" onClick={() => onNudge(15)} aria-label={t('timer.forward')} title={t('timer.forward')}>
           <RotateCw size={20} />
           <span>15</span>
         </button>
       </div>
       <div className="timer-bottom">
-        <button className="stop-button" type="button" onClick={onStop} disabled={isIdle} title="Detener sesion y guardar en Recordar">
+        <button className="stop-button" type="button" onClick={onStop} disabled={isIdle} title={t('timer.stopTitle')}>
           <Square size={15} fill="currentColor" />
-          Detener
+          {t('timer.stop')}
         </button>
         {onToggleCues && (
           <div className="timer-cue-actions">
-            <button type="button" className="icon-button small" title={cuesVisible ? 'Ocultar cues' : 'Mostrar cues'} onClick={onToggleCues}>
+            <button type="button" className="icon-button small" title={cuesVisible ? t('timer.hideCues') : t('timer.showCues')} onClick={onToggleCues}>
               {cuesVisible ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
             </button>
-            <button type="button" className="icon-button small" title="Editar cues" onClick={onEditCues}>
+            <button type="button" className="icon-button small" title={t('timer.editCues')} onClick={onEditCues}>
               <Pencil size={14} />
             </button>
           </div>
