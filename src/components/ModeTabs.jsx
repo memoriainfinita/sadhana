@@ -1,14 +1,16 @@
 import { BookOpen, CirclePlay, SlidersHorizontal } from 'lucide-react';
+import { useT } from '../i18n/useT.js';
 
 const MODES = [
-  { id: 'practice', label: 'Practicar', icon: CirclePlay },
-  { id: 'design', label: 'Diseñar', icon: SlidersHorizontal },
-  { id: 'remember', label: 'Recordar', icon: BookOpen },
+  { id: 'practice', icon: CirclePlay },
+  { id: 'design', icon: SlidersHorizontal },
+  { id: 'remember', icon: BookOpen },
 ];
 
 export function ModeTabs({ activeMode, onModeChange }) {
+  const t = useT();
   return (
-    <nav className="mode-tabs" aria-label="Modos de Sadhana">
+    <nav className="mode-tabs" aria-label={t('modes.navLabel')}>
       {MODES.map((mode) => {
         const Icon = mode.icon;
         return (
@@ -19,7 +21,7 @@ export function ModeTabs({ activeMode, onModeChange }) {
             onClick={() => onModeChange(mode.id)}
           >
             <Icon size={18} />
-            <span>{mode.label}</span>
+            <span>{t('modes.' + mode.id)}</span>
           </button>
         );
       })}
