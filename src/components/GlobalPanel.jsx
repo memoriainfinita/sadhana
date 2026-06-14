@@ -1,10 +1,14 @@
+import { useT } from '../i18n/useT.js';
+import { useLang } from '../i18n/LanguageContext.jsx';
+import { LANGUAGES } from '../i18n/index.js';
+
 const ACCENT_PRESETS = [
-  { label: 'Ambar', value: '#f6a133' },
-  { label: 'Oro', value: '#e8c547' },
-  { label: 'Salvia', value: '#7eb87a' },
-  { label: 'Cian', value: '#4db8b5' },
-  { label: 'Rosa', value: '#e07070' },
-  { label: 'Lila', value: '#9b8bc8' },
+  { key: 'amber', value: '#f6a133' },
+  { key: 'gold', value: '#e8c547' },
+  { key: 'sage', value: '#7eb87a' },
+  { key: 'cyan', value: '#4db8b5' },
+  { key: 'rose', value: '#e07070' },
+  { key: 'lilac', value: '#9b8bc8' },
 ];
 
 export function GlobalPanel({
@@ -24,41 +28,47 @@ export function GlobalPanel({
   showSoundNames,
   onShowSoundNamesChange,
 }) {
+  const t = useT();
+  const { lang, setLang } = useLang();
+
   if (!activePanel) return null;
 
   return (
-    <aside className="global-panel" aria-label="Panel global">
+    <aside className="global-panel" aria-label={t('shell.globalControls')}>
       <div className="global-panel-header">
-        <span>Panel</span>
-        <button type="button" title="Cerrar panel" onClick={onClose}>Cerrar</button>
+        <span>{t('panel.header')}</span>
+        <button type="button" title={t('panel.closeTitle')} onClick={onClose}>{t('panel.close')}</button>
       </div>
 
       {activePanel === 'theme' && (
         <>
-          <h2>Tema</h2>
-          <button type="button" title="Cambiar entre tema sobrio y alto contraste" onClick={onThemeToggle}>
-            {theme === 'dim' ? 'Usar contraste alto' : 'Usar tema sobrio'}
+          <h2>{t('theme.heading')}</h2>
+          <button type="button" title={t('theme.toggleTitle')} onClick={onThemeToggle}>
+            {theme === 'dim' ? t('theme.useContrast') : t('theme.useDim')}
           </button>
           <label>
-            Color de acento
+            {t('theme.accentLabel')}
             <div className="accent-presets">
-              {ACCENT_PRESETS.map((preset) => (
-                <button
-                  key={preset.value}
-                  type="button"
-                  className={`accent-swatch${accentColor === preset.value ? ' active' : ''}`}
-                  style={{ background: preset.value }}
-                  aria-label={preset.label}
-                  title={preset.label}
-                  onClick={() => onAccentColorChange(preset.value)}
-                />
-              ))}
+              {ACCENT_PRESETS.map((preset) => {
+                const label = t('theme.accents.' + preset.key);
+                return (
+                  <button
+                    key={preset.value}
+                    type="button"
+                    className={`accent-swatch${accentColor === preset.value ? ' active' : ''}`}
+                    style={{ background: preset.value }}
+                    aria-label={label}
+                    title={label}
+                    onClick={() => onAccentColorChange(preset.value)}
+                  />
+                );
+              })}
               <input
                 type="color"
                 value={accentColor}
                 onChange={(e) => onAccentColorChange(e.target.value)}
-                aria-label="Color personalizado"
-                title="Color personalizado"
+                aria-label={t('theme.customColor')}
+                title={t('theme.customColor')}
                 className="accent-color-input"
               />
             </div>
@@ -68,9 +78,9 @@ export function GlobalPanel({
 
       {activePanel === 'audio' && (
         <>
-          <h2>Audio</h2>
+          <h2>{t('audio.heading')}</h2>
           <label>
-            Volumen maestro
+            {t('audio.masterVolume')}
             <input
               type="range"
               min="0"
@@ -82,26 +92,34 @@ export function GlobalPanel({
           </label>
           <label className="check-row">
             <input type="checkbox" checked={muted} onChange={(event) => onMutedChange(event.target.checked)} />
-            Silenciar
+            {t('audio.mute')}
           </label>
-          <button type="button" title="Detener todo el audio en reproduccion ahora mismo" onClick={onStopAudio}>Detener audio</button>
+          <button type="button" title={t('audio.stopTitle')} onClick={onStopAudio}>{t('audio.stop')}</button>
         </>
       )}
 
       {activePanel === 'settings' && (
         <>
-          <h2>Configuracion</h2>
+          <h2>{t('settings.heading')}</h2>
           <label className="check-row">
             <input
               type="checkbox"
               checked={showSoundNames}
               onChange={(event) => onShowSoundNamesChange(event.target.checked)}
             />
-            Mostrar nombre del sonido al dispararse
+            {t('settings.showSoundNames')}
           </label>
-          <button type="button" title="Copiar presets y sesiones al portapapeles como JSON" onClick={onExportData}>Exportar datos</button>
+          <label className="settings-language">
+            {t('settings.language')}
+            <select value={lang} onChange={(event) => setLang(event.target.value)}>
+              {LANGUAGES.map((l) => (
+                <option key={l.code} value={l.code}>{l.native}</option>
+              ))}
+            </select>
+          </label>
+          <button type="button" title={t('settings.exportTitle')} onClick={onExportData}>{t('settings.export')}</button>
           <textarea
-            placeholder="Pega aqui un JSON exportado"
+            placeholder={t('settings.importPlaceholder')}
             onBlur={(event) => {
               if (event.target.value.trim()) onImportData(event.target.value);
             }}
