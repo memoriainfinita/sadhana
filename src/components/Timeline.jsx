@@ -57,6 +57,27 @@ export function Timeline({
     setDraggingId(null);
   }
 
+  function handleMarkerKeyDown(cue, event) {
+    // Space/Enter select the cue. The marker button has no onClick (selection is
+    // wired to pointer-down), so call onSelectCue explicitly. stopPropagation keeps
+    // the global shortcut handler from also firing play/pause.
+    if (event.key === ' ' || event.key === 'Enter') {
+      event.preventDefault();
+      event.stopPropagation();
+      onSelectCue(cue.id);
+      return;
+    }
+    const next = stepFromKey(cue.time, event.key, {
+      min: 0,
+      max: durationSeconds,
+      step: 5,
+    });
+    if (next === null) return;
+    event.preventDefault();
+    event.stopPropagation();
+    onMoveCue(cue.id, next);
+  }
+
   function handlePlayheadPointerDown(event) {
     event.currentTarget.setPointerCapture(event.pointerId);
     setPlayheadDragging(true);
@@ -123,9 +144,11 @@ export function Timeline({
             style={{ left: `${markerPosition(cue)}%`, '--cue-color': cue.color }}
             type="button"
             aria-label={t('timeline.cueAria', { name: cue.name })}
+            aria-pressed={cue.id === selectedCueId}
             onPointerDown={(e) => handleMarkerPointerDown(cue, e)}
             onPointerMove={(e) => handleMarkerPointerMove(cue, e)}
             onPointerUp={handleMarkerPointerUp}
+            onKeyDown={(e) => handleMarkerKeyDown(cue, e)}
           >
             <span />
             <strong>{formatClockTime(cue.time)}</strong>
@@ -189,6 +212,7 @@ function TrackRow({ cue, selected, durationSeconds, onSelectCue, onResizeCue, on
     <div
       role="button"
       tabIndex={0}
+      aria-pressed={selected}
       className={selected ? 'track-row selected' : 'track-row'}
       onClick={() => onSelectCue(cue.id)}
       onKeyDown={handleKeyDown}
