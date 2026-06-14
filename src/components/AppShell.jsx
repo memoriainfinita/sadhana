@@ -1,9 +1,10 @@
 import { Settings, SunMedium, Volume2 } from 'lucide-react';
 import { ModeTabs } from './ModeTabs.jsx';
+import { useT } from '../i18n/useT.js';
 
-function BrandMark() {
+function BrandMark({ label }) {
   return (
-    <svg viewBox="0 0 40 40" role="img" aria-label="Sadhana">
+    <svg viewBox="0 0 40 40" role="img" aria-label={label}>
       <text
         x="20"
         y="21"
@@ -22,24 +23,25 @@ function BrandMark() {
 }
 
 export function AppShell({ activeMode, onModeChange, activePanel, onPanelChange, children }) {
+  const t = useT();
   return (
     <div className="sadhana-shell">
       <header className="topbar">
-        <div className="brand" aria-label="Sadhana">
+        <div className="brand" aria-label={t('shell.brand')}>
           <div className="brand-mark" aria-hidden="true">
-            <BrandMark />
+            <BrandMark label={t('shell.brand')} />
           </div>
-          <span>Sadhana</span>
+          <span>{t('shell.brand')}</span>
         </div>
 
         <ModeTabs activeMode={activeMode} onModeChange={onModeChange} />
 
-        <div className="topbar-actions" aria-label="Controles globales">
+        <div className="topbar-actions" aria-label={t('shell.globalControls')}>
           <button
             className={activePanel === 'theme' ? 'icon-button active' : 'icon-button'}
             type="button"
-            aria-label="Tema"
-            title="Tema y color de acento"
+            aria-label={t('shell.theme')}
+            title={t('shell.themeTitle')}
             onClick={() => onPanelChange(activePanel === 'theme' ? null : 'theme')}
           >
             <SunMedium size={19} />
@@ -47,8 +49,8 @@ export function AppShell({ activeMode, onModeChange, activePanel, onPanelChange,
           <button
             className={activePanel === 'audio' ? 'icon-button active' : 'icon-button'}
             type="button"
-            aria-label="Audio"
-            title="Volumen y silencio"
+            aria-label={t('shell.audio')}
+            title={t('shell.audioTitle')}
             onClick={() => onPanelChange(activePanel === 'audio' ? null : 'audio')}
           >
             <Volume2 size={19} />
@@ -56,8 +58,8 @@ export function AppShell({ activeMode, onModeChange, activePanel, onPanelChange,
           <button
             className={activePanel === 'settings' ? 'icon-button active' : 'icon-button'}
             type="button"
-            aria-label="Configuracion"
-            title="Exportar / importar datos"
+            aria-label={t('shell.settings')}
+            title={t('shell.settingsTitle')}
             onClick={() => onPanelChange(activePanel === 'settings' ? null : 'settings')}
           >
             <Settings size={19} />
