@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useT } from '../i18n/useT.js';
 import { useLang } from '../i18n/LanguageContext.jsx';
 import { LANGUAGES } from '../i18n/index.js';
@@ -30,11 +31,23 @@ export function GlobalPanel({
 }) {
   const t = useT();
   const { lang, setLang } = useLang();
+  const panelRef = useRef(null);
+
+  useEffect(() => {
+    if (!activePanel) return;
+    // Move focus into the panel each time it opens or switches panels.
+    const node = panelRef.current;
+    if (!node) return;
+    const focusable = node.querySelector(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    (focusable ?? node).focus();
+  }, [activePanel]);
 
   if (!activePanel) return null;
 
   return (
-    <aside className="global-panel" aria-label={t('shell.globalControls')}>
+    <aside className="global-panel" ref={panelRef} tabIndex={-1} aria-label={t('shell.globalControls')}>
       <div className="global-panel-header">
         <span>{t('panel.header')}</span>
         <button type="button" title={t('panel.closeTitle')} onClick={onClose}>{t('panel.close')}</button>
@@ -58,6 +71,7 @@ export function GlobalPanel({
                     className={`accent-swatch${accentColor === preset.value ? ' active' : ''}`}
                     style={{ background: preset.value }}
                     aria-label={label}
+                    aria-pressed={accentColor === preset.value}
                     title={label}
                     onClick={() => onAccentColorChange(preset.value)}
                   />
