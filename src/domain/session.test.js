@@ -3,7 +3,34 @@ import {
   createSessionState,
   getRemainingSeconds,
   sessionReducer,
+  sessionDisplay,
 } from './session.js';
+
+describe('sessionDisplay', () => {
+  const t = (key, vars) => (key === 'sessions.withCue' ? `Sesion con ${vars.name}`
+    : key === 'sessions.defaultName' ? 'Sesion completada' : key);
+  const fmtDuration = (s) => `${Math.round(s / 60)} min`;
+  const fmtDate = () => 'hace 1 hora';
+
+  test('formats a new raw session', () => {
+    const item = { cueName: 'Bosque', durationSeconds: 1200, createdAt: '2026-06-14T10:00:00Z' };
+    expect(sessionDisplay(item, t, fmtDuration, fmtDate)).toEqual({
+      name: 'Sesion con Bosque', duration: '20 min', when: 'hace 1 hora',
+    });
+  });
+
+  test('falls back to old preformatted fields for legacy sessions', () => {
+    const item = { name: 'Sesion vieja', duration: '15 min', when: 'Hoy, 09:00' };
+    expect(sessionDisplay(item, t, fmtDuration, fmtDate)).toEqual({
+      name: 'Sesion vieja', duration: '15 min', when: 'Hoy, 09:00',
+    });
+  });
+
+  test('uses default name when neither cueName nor legacy name present', () => {
+    expect(sessionDisplay({ durationSeconds: 600 }, t, fmtDuration, fmtDate).name)
+      .toBe('Sesion completada');
+  });
+});
 
 describe('session domain', () => {
   test('starts a session from idle state', () => {

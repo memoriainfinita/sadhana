@@ -19,7 +19,7 @@ import {
   updateCue,
 } from './domain/cues.js';
 import { createCueSchedulerState, getDueCues, resetCueScheduler } from './domain/scheduler.js';
-import { createSessionState, sessionReducer } from './domain/session.js';
+import { createSessionState, sessionReducer, sessionDisplay } from './domain/session.js';
 import {
   STORAGE_KEYS,
   cleanStoredExamplesOnce,
@@ -31,18 +31,13 @@ import {
   seedDefaultPresets,
   writeJson,
 } from './domain/storage.js';
-import { DEFAULT_PRESETS, presetDurationSeconds } from './domain/presets.js';
+import { DEFAULT_PRESETS, presetDurationSeconds, resolvePresetName } from './domain/presets.js';
+import { useT } from './i18n/useT.js';
 
 const SESSION_DURATION_SECONDS = 24 * 60;
 
-function nowLabel() {
-  return new Intl.DateTimeFormat('es-ES', {
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date());
-}
-
 export function App() {
+  const t = useT();
   const [activeMode, setActiveMode] = useState('practice');
   const [activePanel, setActivePanel] = useState(null);
   const [theme, setTheme] = useState('dim');
@@ -219,13 +214,13 @@ export function App() {
   function persistSession(seconds) {
     const next = saveSession(window.localStorage, {
       id: crypto.randomUUID(),
-      name: selectedCue?.name ? `Sesion con ${selectedCue.name}` : 'Sesion completada',
-      duration: `${Math.round(seconds / 60)} min`,
-      when: `Hoy, ${nowLabel()}`,
+      cueName: selectedCue?.name ?? null,   // raw, for the title
+      durationSeconds: seconds,             // raw number
+      createdAt: new Date().toISOString(),  // raw timestamp
       color: selectedCue?.color ?? '#f6a133',
     });
     setSessions(next);
-    setNotice('Sesion guardada en Recordar');
+    setNotice(t('notices.sessionSaved'));
   }
 
   function handleSavePreset(name) {
@@ -304,13 +299,14 @@ export function App() {
   }
 
   function handleRepeatSession(item) {
-    const minutes = parseInt(item.duration, 10);
-    if (minutes > 0) {
+    const seconds = item.durationSeconds ?? (parseInt(item.duration, 10) || 0) * 60;
+    if (seconds > 0) {
       dispatchSession({ type: 'stop' });
-      dispatchSession({ type: 'setDuration', durationSeconds: minutes * 60 });
+      dispatchSession({ type: 'setDuration', durationSeconds: seconds });
     }
     setActiveMode('practice');
-    setNotice(`Repetir: ${item.name}`);
+    const { name } = sessionDisplay(item, t, (s) => `${Math.round(s / 60)} min`, () => '');
+    setNotice(t('notices.repeat', { name }));
   }
 
   function handleDurationChange(minutes) {
