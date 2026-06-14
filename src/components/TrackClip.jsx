@@ -98,9 +98,9 @@ export function TrackClip({
       <div className="clip-ramp-out" style={{ width: `${rampOutWidth}%` }} />
       <span>{formatClockTime(cue.time)}</span>
       <strong>{cue.name}</strong>
-      <div className="clip-fade-in-handle" {...handleEvents('fadeIn')} />
-      <div className="clip-fade-out-handle" {...handleEvents('fadeOut')} />
-      <div className="clip-resize-handle" {...handleEvents('resize')} />
+      <div className="clip-fade-in-handle" aria-hidden="true" {...handleEvents('fadeIn')} />
+      <div className="clip-fade-out-handle" aria-hidden="true" {...handleEvents('fadeOut')} />
+      <div className="clip-resize-handle" aria-hidden="true" {...handleEvents('resize')} />
     </div>
   );
 }
