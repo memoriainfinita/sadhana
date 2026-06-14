@@ -8,7 +8,7 @@ status: approved
 
 ## Objetivo
 
-Corregir los 13 hallazgos de la auditoria WCAG de Sadhana. Alcance: bloques A (teclado), B (estado/semantica) y C (movimiento/contraste/foco). Objetivo de conformidad: WCAG 2.1 nivel AA.
+Corregir los hallazgos de la auditoria WCAG de Sadhana: 13 iniciales mas 2 detectados en revision de huecos (A15 guard global, B14 estado de seleccion). Alcance: bloques A (teclado), B (estado/semantica) y C (movimiento/contraste/foco). Objetivo de conformidad: WCAG 2.1 nivel AA.
 
 ## Decisiones cerradas
 
@@ -28,6 +28,7 @@ Corregir los 13 hallazgos de la auditoria WCAG de Sadhana. Alcance: bloques A (t
 | A2 | Playhead `<div>` solo-pointer, no seekable por teclado | `Timeline.jsx:122` | `role="slider"`, `tabIndex=0`, `aria-valuemin/max/now`, `aria-valuetext`, `aria-label`; manejo de flechas + Home/End |
 | A3 | Handles de clip `<div>` solo-pointer | `TrackClip.jsx:101-103` | `aria-hidden="true"` en los tres handles; funcion cubierta por inspector (equivalente de teclado) |
 | A4 | Markers movibles solo por pointer | `Timeline.jsx:107` | Anadir `onKeyDown` al boton marker: flechas mueven `time`, Home/End a 0/duracion |
+| A15 | El handler global de teclado solo exime `INPUT/TEXTAREA/SELECT`; intercepta `Space`/flechas cuando un widget del timeline tiene foco | `App.jsx:150-151` | Ampliar el guard para eximir tambien `button`, `[role="button"]` y `[role="slider"]`. Precondicion de A2 y A4 |
 
 ### Bloque B — Estado y semantica (WCAG 1.4.1, 4.1.2)
 
@@ -37,7 +38,8 @@ Corregir los 13 hallazgos de la auditoria WCAG de Sadhana. Alcance: bloques A (t
 | B6 | Botones de panel sin `aria-expanded` | `AppShell.jsx:40-66` | `aria-expanded={activePanel === ...}` en los tres |
 | B7 | Swatches de acento sin estado | `GlobalPanel.jsx:55` | `aria-pressed={accentColor === preset.value}` |
 | B8 | Toggle de cues sin `aria-expanded` | `TimerPanel.jsx:68` | `aria-expanded={cuesVisible}` |
-| B9 | Instruccion activa no se anuncia | `TimerPanel.jsx:34` | `aria-live="polite"` en `.playing-instruction-label` |
+| B9 | Instruccion activa no se anuncia | `TimerPanel.jsx:34` | `aria-live="polite"` en `.playing-instruction-label`. Ver "Region aria-live unica" por el doble montaje en zen |
+| B14 | Estado "seleccionado" de markers y track-rows solo visual (1.4.1) | `Timeline.jsx:107`, `Timeline.jsx:168` | `aria-pressed={cue.id === selectedCueId}` en el boton marker y en el `track-row` (`role="button"`) |
 
 ### Bloque C — Movimiento, contraste, foco (WCAG 1.4.3, 2.3.3, 2.4.3)
 
@@ -62,8 +64,14 @@ Corregir los 13 hallazgos de la auditoria WCAG de Sadhana. Alcance: bloques A (t
 
 - Siguen siendo `<button>` (ya focusables, ya con `aria-label`).
 - Con foco: `ArrowRight`/`ArrowLeft` llaman `onMoveCue(cue.id, time +- 5)`; `Home`/`End` a 0/duracion. `onMoveCue` ya hace `clampCueTime`.
-- `Enter`/`Space` mantienen su comportamiento actual (seleccionar cue).
+- `Enter`/`Space` mantienen su comportamiento actual (seleccionar cue). Requiere A15: sin eximir el button del guard global, `Space` en design dispara play/pause en vez de seleccionar.
 - `preventDefault` en las teclas manejadas para no hacer scroll de pagina.
+
+### Region aria-live unica (GAP-2)
+
+- En `zenMode && activeMode === 'practice'` se montan dos `TimerPanel` a la vez (`App.jsx:472` overlay zen + `App.jsx:486` practice), ambos con la region `aria-live` de instruccion. Sin correccion, cada cambio se anuncia dos veces.
+- Solucion: el `TimerPanel` recibe una prop `announce` (boolean). Solo la instancia activa la pone a `true`: el overlay zen cuando `zenMode`, el de practice cuando `!zenMode`. La region usa `aria-live="polite"` solo si `announce`; la otra instancia renderiza el texto sin `aria-live`.
+- GAP-7: el nombre del sonido (`.playing-cue-label`) NO lleva `aria-live`, por decision deliberada: es informacion secundaria y opcional (`showSoundNames`), anunciarla anadiria verbosidad. Solo la instruccion se anuncia.
 
 ### Handles (resize / fadeIn / fadeOut)
 
@@ -72,14 +80,15 @@ Corregir los 13 hallazgos de la auditoria WCAG de Sadhana. Alcance: bloques A (t
 
 ## Foco de paneles (disclosure no modal)
 
-- `GlobalPanel` recibe una `ref` al contenedor `<aside>`. Al pasar de `activePanel === null` a un panel, un `useEffect` enfoca el primer control focusable del panel (o el `<aside>` con `tabIndex=-1`).
-- Al cerrar, el foco vuelve al boton del topbar que lo abrio. `App.jsx` guarda una `ref` al ultimo disparador.
+- `GlobalPanel` recibe una `ref` al contenedor `<aside>`. Un `useEffect` con dependencia `[activePanel]` enfoca el primer control focusable del panel (o el `<aside>` con `tabIndex=-1`) **cada vez que `activePanel` pasa a un valor no-null**, incluido el cambio directo entre paneles (theme -> audio, sin pasar por null).
+- `App.jsx` guarda una `ref` al ultimo boton disparador (se asigna en el `onClick` de cada boton del topbar). **Todos los caminos de cierre** restauran el foco a ese boton: `Escape`, el boton X interno del panel (`GlobalPanel.jsx:40`) y volver a pulsar el mismo boton del topbar.
 - Manejo de `Escape`: ampliar el handler global de `App.jsx` para que, si hay `activePanel`, lo cierre antes que cualquier otra accion. No se anade focus-trap: el panel no es modal.
 
 ## :focus-visible (estilo de anillo)
 
 - Regla unica: `:where(button, [role="button"], [role="slider"], a, input, select, textarea):focus-visible` con `outline: 2px solid var(--accent); outline-offset: 2px;`.
 - Eliminar o complementar los `outline:none` existentes (`.preset-name-input`, `.cue-inspector input/select/textarea`) para que el foco quede visible. El `:focus` que solo cambia `border-color` se conserva como refuerzo.
+- GAP-5: `.timeline-panel` tiene `overflow:hidden` (`styles.css:434`), que recorta un `outline-offset` positivo en markers/playhead cercanos al borde. Para los widgets dentro del timeline el foco usa anillo **interno** (`outline-offset: -2px` o `box-shadow` inset) en lugar del offset positivo, de modo que quede dentro del area visible.
 
 ## prefers-reduced-motion
 
@@ -111,3 +120,4 @@ Corregir los 13 hallazgos de la auditoria WCAG de Sadhana. Alcance: bloques A (t
 - Skip-link de navegacion (no critico; landmarks ya presentes).
 - Replicar el gesto de arrastre de fades por teclado (cubierto por inspector).
 - Cambiar el color de acento o el tema (acento ya pasa AA).
+- **GAP-6 / WCAG 1.4.11 Non-text Contrast (diferido a TODO propio):** los bordes de controles (`--line-strong` #38403e sobre panel ~1.3:1) no llegan al 3:1 que exige 1.4.11 para identificar componentes de UI. Es otro criterio, con alcance propio (todos los bordes de inputs/botones y sus estados), igual que se separo la auditoria de i18n. El anillo de foco nuevo si pasa 1.4.11 (acento 8:1).
