@@ -1,6 +1,11 @@
 # Sadhana
 
+[![Live demo](https://img.shields.io/badge/demo-live-f6a133?style=flat)](https://memoriainfinita.github.io/sadhana/)
+[![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
+
 Audiovisual/music app for guided sessions with audio, cues and practice history.
+
+**Live:** https://memoriainfinita.github.io/sadhana/
 
 Three modes:
 
