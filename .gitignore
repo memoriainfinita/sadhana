@@ -1,5 +1,7 @@
 node_modules/
 dist/
+docs/
+.backups/
 .DS_Store
 *.local
 .env
