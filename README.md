@@ -1,12 +1,12 @@
 # Sadhana
 
-App audiovisual/musical para sesiones guiadas con audio, cues y memoria de práctica.
+Audiovisual/music app for guided sessions with audio, cues and practice history.
 
-Tres modos:
+Three modes:
 
-- **Practicar** — temporizador, cues y la instrucción activa.
-- **Diseñar** — timeline con cues arrastrables, clips con fades estilo DAW, inspector.
-- **Recordar** — presets y sesiones recientes.
+- **Practice** — timer, cues and the active instruction.
+- **Design** — timeline with draggable cues, DAW-style fade clips, inspector.
+- **Remember** — presets and recent sessions.
 
 ## Stack
 
@@ -15,14 +15,14 @@ React 19 + Vite 6, pnpm.
 ## Scripts
 
 ```bash
-pnpm dev     # servidor de desarrollo
-pnpm build   # build de producción
+pnpm dev     # development server
+pnpm build   # production build
 pnpm test    # tests (vitest)
 ```
 
-## Características
+## Features
 
-- Audio scheduling con fades in/out y volumen maestro.
-- Presets y sesiones persistentes, exportables/importables.
-- i18n casero: 16 idiomas registrados (es/en completos).
-- Accesibilidad: operación por teclado, foco visible, WCAG 1.4.11.
+- Audio scheduling with fade in/out and master volume.
+- Persistent presets and sessions, exportable/importable.
+- Homegrown i18n: 16 languages registered (es/en complete).
+- Accessibility: keyboard operation, visible focus, WCAG 1.4.11.
