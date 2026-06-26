@@ -36,5 +36,6 @@ function audioManifestPlugin() {
 }
 
 export default defineConfig({
+  base: '/sadhana/',
   plugins: [react(), audioManifestPlugin()],
 });

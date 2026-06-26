@@ -1,5 +1,5 @@
 export class AudioRegistry {
-  constructor({ basePath = '/audio/' } = {}) {
+  constructor({ basePath = `${import.meta.env.BASE_URL}audio/` } = {}) {
     this.basePath = basePath;
     this.sources = new Map();
     this._masterVolumeScale = 1;
