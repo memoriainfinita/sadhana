@@ -31,3 +31,7 @@ pnpm test    # tests (vitest)
 - Persistent presets and sessions, exportable/importable.
 - Homegrown i18n: 16 languages registered (es/en complete).
 - Accessibility: keyboard operation, visible focus, WCAG 1.4.11.
+
+## Credits
+
+Developed by [@memoriainfinita](https://github.com/memoriainfinita) with the assistance of Claude (Anthropic): Opus 4.8 and Sonnet 4.6.
