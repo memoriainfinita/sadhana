@@ -1,6 +1,8 @@
 node_modules/
 dist/
 docs/
+.claude/
+openspec/
 .backups/
 .DS_Store
 *.local
