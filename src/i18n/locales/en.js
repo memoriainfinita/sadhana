@@ -1,4 +1,3 @@
-// src/i18n/locales/en.js
 export default {
   app: { title: 'Sadhana' },
   modes: { navLabel: 'Sadhana modes', practice: 'Practice', design: 'Design', remember: 'Remember' },

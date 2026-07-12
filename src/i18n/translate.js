@@ -1,4 +1,3 @@
-// src/i18n/translate.js
 function getPath(dict, key) {
   return key.split('.').reduce((node, part) => (node == null ? undefined : node[part]), dict);
 }

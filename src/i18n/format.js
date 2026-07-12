@@ -1,5 +1,3 @@
-// src/i18n/format.js
-
 // Whole-minute duration. "min" is the same token in es/en; other locales can
 // override later via a key if needed.
 export function formatDuration(seconds, lang) {

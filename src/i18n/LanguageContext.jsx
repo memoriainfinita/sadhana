@@ -1,4 +1,3 @@
-// src/i18n/LanguageContext.jsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import { BASE_LANG, pickInitialLang, resolveDir } from './index.js';
 import { STORAGE_KEYS } from '../domain/storage.js';

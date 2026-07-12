@@ -1,4 +1,3 @@
-// src/i18n/index.js
 // Implemented (have a dictionary): es, en, pi. The rest are registered so the
 // selector lists them; their dictionaries are added later (each falls back to es).
 export const LANGUAGES = [

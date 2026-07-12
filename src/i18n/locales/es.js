@@ -1,4 +1,3 @@
-// src/i18n/locales/es.js
 export default {
   app: { title: 'Sadhana' },
 
