@@ -44,7 +44,7 @@ describe('storage domain', () => {
 
   test('deletes saved presets by id', () => {
     const storage = memoryStorage({
-      'sadhana-next.presets': JSON.stringify([{ id: 'a' }, { id: 'b' }]),
+      'sadhana.presets': JSON.stringify([{ id: 'a' }, { id: 'b' }]),
     });
 
     const next = deletePreset(storage, 'a');
@@ -54,7 +54,7 @@ describe('storage domain', () => {
 
   test('deletes saved sessions by id', () => {
     const storage = memoryStorage({
-      'sadhana-next.sessions': JSON.stringify([{ id: 'a' }, { id: 'b' }]),
+      'sadhana.sessions': JSON.stringify([{ id: 'a' }, { id: 'b' }]),
     });
 
     const next = deleteSession(storage, 'b');
@@ -86,11 +86,11 @@ describe('storage domain', () => {
 
   test('cleanStoredExamples preserves presets with default cue names', () => {
     const storage = memoryStorage({
-      'sadhana-next.presets': JSON.stringify([
+      'sadhana.presets': JSON.stringify([
         { id: 'user-preset', name: 'Nueva cue' },
         { id: 'user-preset-2', name: 'Nueva cue copia' },
       ]),
-      'sadhana-next.sessions': JSON.stringify([]),
+      'sadhana.sessions': JSON.stringify([]),
     });
 
     const result = cleanStoredExamples(storage);
@@ -100,12 +100,12 @@ describe('storage domain', () => {
 
   test('cleans old sample presets and sessions from storage', () => {
     const storage = memoryStorage({
-      'sadhana-next.presets': JSON.stringify([
+      'sadhana.presets': JSON.stringify([
         { id: 'sample-ritual', name: 'Ritual base' },
         { id: 'manual', name: 'Trabajo real' },
         { id: 'old', name: 'Bosque prueba browser' },
       ]),
-      'sadhana-next.sessions': JSON.stringify([
+      'sadhana.sessions': JSON.stringify([
         { id: 'morning', name: 'Mañana tranquila' },
         { id: 'real-session', name: 'Sesion guardada' },
       ]),
@@ -119,11 +119,11 @@ describe('storage domain', () => {
 
   test('cleanStoredExamplesOnce filters on first run and sets the cleaned flag', () => {
     const storage = memoryStorage({
-      'sadhana-next.presets': JSON.stringify([
+      'sadhana.presets': JSON.stringify([
         { id: 'sample-ritual', name: 'Ritual base' },
         { id: 'manual', name: 'Trabajo real' },
       ]),
-      'sadhana-next.sessions': JSON.stringify([]),
+      'sadhana.sessions': JSON.stringify([]),
     });
 
     const result = cleanStoredExamplesOnce(storage);
@@ -134,11 +134,11 @@ describe('storage domain', () => {
 
   test('cleanStoredExamplesOnce does not filter again once the flag is set', () => {
     const storage = memoryStorage({
-      'sadhana-next.examplesCleaned': JSON.stringify(true),
-      'sadhana-next.presets': JSON.stringify([
+      'sadhana.examplesCleaned': JSON.stringify(true),
+      'sadhana.presets': JSON.stringify([
         { id: 'whatever', name: 'Relajación profunda' },
       ]),
-      'sadhana-next.sessions': JSON.stringify([]),
+      'sadhana.sessions': JSON.stringify([]),
     });
 
     const result = cleanStoredExamplesOnce(storage);
@@ -159,7 +159,7 @@ describe('storage domain', () => {
   test('seedDefaultPresets does not overwrite existing presets', () => {
     const existing = [{ id: 'user', name: 'Mi preset', cues: [] }];
     const storage = memoryStorage({
-      'sadhana-next.presets': JSON.stringify(existing),
+      'sadhana.presets': JSON.stringify(existing),
     });
 
     const result = seedDefaultPresets(storage, [{ id: 'default', name: 'Default', cues: [] }]);

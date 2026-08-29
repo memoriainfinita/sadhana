@@ -1,9 +1,9 @@
 export const STORAGE_KEYS = {
-  presets: 'sadhana-next.presets',
-  sessions: 'sadhana-next.sessions',
-  showSoundNames: 'sadhana-next.showSoundNames',
-  examplesCleaned: 'sadhana-next.examplesCleaned',
-  lang: 'sadhana-next.lang',
+  presets: 'sadhana.presets',
+  sessions: 'sadhana.sessions',
+  showSoundNames: 'sadhana.showSoundNames',
+  examplesCleaned: 'sadhana.examplesCleaned',
+  lang: 'sadhana.lang',
 };
 
 const OLD_SAMPLE_IDS = new Set([
