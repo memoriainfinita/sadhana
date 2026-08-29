@@ -62,6 +62,19 @@ describe('storage domain', () => {
     expect(next).toEqual([{ id: 'a' }]);
   });
 
+  test('saving user presets never evicts a seeded default', () => {
+    const storage = memoryStorage();
+    const defaults = Array.from({ length: 12 }, (_, i) => ({ id: `default-p${i}`, name: `Default ${i}` }));
+    seedDefaultPresets(storage, defaults);
+
+    for (let i = 0; i < 6; i += 1) savePreset(storage, { id: `user-${i}`, name: `Mio ${i}` });
+
+    const stored = readJson(storage, STORAGE_KEYS.presets, []);
+    defaults.forEach((preset) => {
+      expect(stored.map((p) => p.id), `${preset.id} was evicted by a user save`).toContain(preset.id);
+    });
+  });
+
   test('savePreset prepends, deduplicates by id, and caps at 12', () => {
     const storage = memoryStorage();
     const existing = Array.from({ length: 12 }, (_, i) => ({ id: `p${i}`, name: `Preset ${i}` }));

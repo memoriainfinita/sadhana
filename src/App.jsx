@@ -14,6 +14,7 @@ import {
   createCue,
   duplicateCue,
   getActiveInstruction,
+  resolveInstruction,
   getCueById,
   removeCue,
   updateCue,
@@ -68,6 +69,10 @@ export function App() {
   const schedulerState = useRef(createCueSchedulerState());
   const shortcutsRef = useRef({});
   const lastPanelTrigger = useRef(null);
+  // t is a fresh closure on every language change; the cue-scheduling effect
+  // reads it through a ref so switching language never reschedules audio.
+  const tRef = useRef(t);
+  tRef.current = t;
 
   const selectedCue = useMemo(() => getCueById(cues, selectedCueId), [cues, selectedCueId]);
 
@@ -125,7 +130,7 @@ export function App() {
       }
       setPlayingCueId(cue.id);
 
-      const instruction = cue.instruction ?? '';
+      const instruction = resolveInstruction(cue, tRef.current);
       const instructionDuration = cue.instructionDuration ?? 5;
       if (instruction) {
         setPlayingInstruction(instruction);
@@ -543,7 +548,7 @@ export function App() {
             </div>
             <PlaybackBar
               session={session}
-              instruction={getActiveInstruction(cues, session.elapsedSeconds)}
+              instruction={getActiveInstruction(cues, session.elapsedSeconds, t)}
               onStart={timerPanelProps.onStart}
               onPause={timerPanelProps.onPause}
               onResume={timerPanelProps.onResume}

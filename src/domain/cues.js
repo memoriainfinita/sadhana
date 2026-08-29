@@ -118,22 +118,36 @@ export function updateCue(cues, cueId, updates) {
   return cues.map((cue) => (cue.id === cueId ? { ...cue, ...updates } : cue));
 }
 
-export function getActiveInstruction(cues, elapsedSeconds) {
+// Default-preset instructions are app content (translated by cue id); the ones
+// a user types in the inspector show verbatim. t echoes the key back on a miss,
+// which is how we tell the two apart — the same trick as resolvePresetName.
+export function resolveInstruction(cue, t) {
+  const instruction = cue?.instruction ?? '';
+  if (!instruction) return '';
+  const key = `cueInstructions.${cue.id}`;
+  const translated = t(key);
+  return translated === key ? instruction : translated;
+}
+
+export function getActiveInstructionCue(cues, elapsedSeconds) {
   // A cue's instruction is active during [time, time + instructionDuration).
   // On overlap, the cue with the greatest time wins (the most recent one).
-  let active = '';
+  let active = null;
   let activeTime = -Infinity;
   for (const cue of cues) {
-    const instruction = cue.instruction ?? '';
-    if (!instruction) continue;
+    if (!(cue.instruction ?? '')) continue;
     const start = cue.time;
     const end = start + (cue.instructionDuration ?? 0);
     if (elapsedSeconds >= start && elapsedSeconds < end && start >= activeTime) {
-      active = instruction;
+      active = cue;
       activeTime = start;
     }
   }
   return active;
+}
+
+export function getActiveInstruction(cues, elapsedSeconds, t) {
+  return resolveInstruction(getActiveInstructionCue(cues, elapsedSeconds), t);
 }
 
 export function clampCueTime(seconds, durationSeconds) {

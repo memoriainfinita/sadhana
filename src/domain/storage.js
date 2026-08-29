@@ -40,9 +40,23 @@ export function writeJson(storage, key, value) {
   storage.setItem(key, JSON.stringify(value));
 }
 
+const USER_PRESET_LIMIT = 12;
+
+function isDefaultPreset(item) {
+  return typeof item?.id === 'string' && item.id.startsWith('default-');
+}
+
 export function savePreset(storage, preset) {
   const presets = readJson(storage, STORAGE_KEYS.presets, []);
-  const next = [preset, ...presets.filter((item) => item.id !== preset.id)].slice(0, 12);
+  const merged = [preset, ...presets.filter((item) => item.id !== preset.id)];
+  // The cap bounds what the user accumulates. Seeded defaults are app content,
+  // not history: they are only removed when the user deletes one on purpose.
+  let userCount = 0;
+  const next = merged.filter((item) => {
+    if (isDefaultPreset(item)) return true;
+    userCount += 1;
+    return userCount <= USER_PRESET_LIMIT;
+  });
   writeJson(storage, STORAGE_KEYS.presets, next);
   return next;
 }

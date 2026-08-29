@@ -7,11 +7,37 @@ import {
   duplicateCue,
   formatClockTime,
   getActiveInstruction,
+  resolveInstruction,
   getCueById,
   removeCue,
   sortCuesByTime,
   updateCue,
 } from './cues.js';
+
+describe('resolveInstruction', () => {
+  // t stub mirroring the real one: known keys translate, unknown keys echo back.
+  const t = (key) => (key === 'cueInstructions.yn-start' ? 'Lie down. Eyes closed' : key);
+
+  test('translates a default-preset cue by its cueInstructions key', () => {
+    const cue = { id: 'yn-start', instruction: 'Acuestate. Ojos cerrados' };
+    expect(resolveInstruction(cue, t)).toBe('Lie down. Eyes closed');
+  });
+
+  test('keeps a user-authored instruction verbatim when the key echoes back', () => {
+    const cue = { id: 'cue-9f3a', instruction: 'Respira por la nariz' };
+    expect(resolveInstruction(cue, t)).toBe('Respira por la nariz');
+  });
+
+  test('returns an empty string for a cue with no instruction', () => {
+    expect(resolveInstruction({ id: 'yn-start', instruction: '' }, t)).toBe('');
+    expect(resolveInstruction({ id: 'yn-start' }, t)).toBe('');
+  });
+
+  test('returns an empty string when there is no cue at all', () => {
+    expect(resolveInstruction(null, t)).toBe('');
+  });
+});
+
 
 describe('cues domain', () => {
   test('formats seconds as m:ss labels', () => {
@@ -109,6 +135,8 @@ describe('cues domain', () => {
   });
 
   describe('getActiveInstruction', () => {
+    // Echo stub: no key resolves, so every instruction falls back to its literal.
+    const echo = (key) => key;
     const cues = [
       { id: 'a', time: 0, instruction: 'Respira', instructionDuration: 10 },
       { id: 'b', time: 30, instruction: 'Relaja', instructionDuration: 5 },
@@ -116,21 +144,21 @@ describe('cues domain', () => {
     ];
 
     test('returns the instruction whose window covers the elapsed time', () => {
-      expect(getActiveInstruction(cues, 3)).toBe('Respira');
-      expect(getActiveInstruction(cues, 31)).toBe('Relaja');
+      expect(getActiveInstruction(cues, 3, echo)).toBe('Respira');
+      expect(getActiveInstruction(cues, 31, echo)).toBe('Relaja');
     });
 
     test('returns empty string outside any window', () => {
-      expect(getActiveInstruction(cues, 20)).toBe('');
-      expect(getActiveInstruction(cues, 100)).toBe('');
+      expect(getActiveInstruction(cues, 20, echo)).toBe('');
+      expect(getActiveInstruction(cues, 100, echo)).toBe('');
     });
 
     test('window is half-open: end second is no longer active', () => {
-      expect(getActiveInstruction(cues, 10)).toBe('');
+      expect(getActiveInstruction(cues, 10, echo)).toBe('');
     });
 
     test('ignores cues with empty instruction', () => {
-      expect(getActiveInstruction(cues, 62)).toBe('');
+      expect(getActiveInstruction(cues, 62, echo)).toBe('');
     });
 
     test('on overlap returns the cue with the greatest time', () => {
@@ -138,7 +166,12 @@ describe('cues domain', () => {
         { id: 'a', time: 0, instruction: 'Primera', instructionDuration: 60 },
         { id: 'b', time: 30, instruction: 'Segunda', instructionDuration: 60 },
       ];
-      expect(getActiveInstruction(overlapping, 40)).toBe('Segunda');
+      expect(getActiveInstruction(overlapping, 40, echo)).toBe('Segunda');
+    });
+
+    test('translates the active instruction when its key resolves', () => {
+      const t = (key) => (key === 'cueInstructions.a' ? 'Breathe' : key);
+      expect(getActiveInstruction(cues, 3, t)).toBe('Breathe');
     });
   });
 });
