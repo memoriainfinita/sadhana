@@ -58,3 +58,53 @@ describe('default preset content resolves in both languages', () => {
     expect(differing.length, 'no instruction differs between es and en').toBeGreaterThan(30);
   });
 });
+
+// Spanish copy is written with its accents. The list below holds only forms
+// that are always wrong in Spanish, never a word whose two spellings are both
+// valid depending on the sentence -- "practica"/"practica", "mas"/"mas",
+// "tu"/"tu" and "esta"/"esta" are deliberately absent for that reason.
+const MISSPELLED = [
+  'Disenar', 'Diseno', 'Configuracion', 'reproduccion', 'Ambar',
+  'sesion', 'Sesion', 'Linea', 'Anadir', 'Anade', 'anadida',
+  'ultimo', 'Ultimo', 'Ultima', 'Ultimas', 'Duracion', 'duracion',
+  'Posicion', 'posicion', 'Instruccion', 'instruccion', 'Reten',
+  'guardalo', 'apareceran', 'aqui', 'Aqui', 'valido',
+  'Acuestate', 'Buho', 'Bano', 'Mandibula', 'mandibula', 'demas',
+  'Levantate', 'Sientate', 'Dejalo', 'Quedate', 'tension',
+  'indicacion', 'respiracion', 'despues', 'Despues',
+  'Meditacion', 'Relajacion',
+];
+const misspellingsIn = (text) =>
+  MISSPELLED.filter((word) => new RegExp(`\\b${word}\\b`).test(text));
+
+function collect(node, path, into) {
+  if (typeof node === 'string') {
+    const found = misspellingsIn(node);
+    if (found.length) into.push(`${path}: "${node}" -> ${found.join(', ')}`);
+    return;
+  }
+  if (node && typeof node === 'object') {
+    Object.entries(node).forEach(([k, v]) => collect(v, path ? `${path}.${k}` : k, into));
+  }
+}
+
+describe('Spanish copy is spelled correctly', () => {
+  test('the es dictionary carries its accents', () => {
+    const offenders = [];
+    collect(es, '', offenders);
+    expect(offenders).toEqual([]);
+  });
+
+  test('default preset names, instructions and notes carry their accents', () => {
+    const offenders = [];
+    DEFAULT_PRESETS.forEach((preset) => {
+      collect(preset.name, `${preset.id}.name`, offenders);
+      preset.cues.forEach((cue) => {
+        collect(cue.name, `${preset.id}.${cue.id}.name`, offenders);
+        collect(cue.instruction, `${preset.id}.${cue.id}.instruction`, offenders);
+        collect(cue.notes, `${preset.id}.${cue.id}.notes`, offenders);
+      });
+    });
+    expect(offenders).toEqual([]);
+  });
+});
