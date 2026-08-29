@@ -1,5 +1,6 @@
 # Sadhana
 
+[![Release](https://img.shields.io/github/v/release/memoriainfinita/sadhana?style=flat&color=f6a133)](https://github.com/memoriainfinita/sadhana/releases)
 [![Live demo](https://img.shields.io/badge/demo-live-f6a133?style=flat)](https://memoriainfinita.github.io/sadhana/)
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](LICENSE)
 
