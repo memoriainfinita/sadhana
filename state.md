@@ -80,9 +80,9 @@ last_updated: 2026-09-24
 
 - 2026-08-29: Cierre documental. `openspec/` archivado en `.archive/openspec/` con la propuesta `expand-default-presets` completa (config, proposal, design, spec y tasks con sus 35 tareas hechas); la regla de `.gitignore` para `openspec/` se conserva por si se vuelve a usar la herramienta. README actualizado: nueva entrada de features con la biblioteca de 12 sesiones (de los 5 min de respiracion a los 50 de foco, crossfades, cuencos superpuestos y el guion de facilitador en las notas), la linea de i18n matizada (16 idiomas, es/en completos, pali parcial, y ahora tambien se traducen nombres de preset e instrucciones de cue mientras que lo que escribe el usuario se respeta) y creditos con Opus 5. Metadata de GitHub revisada y sin cambios: descripcion y 10 topics siguen siendo exactos. Commit `fd3af8e`.
 
-- 2026-09-24: `state.md` versionado otra vez, sin rutas locales ni el correo `.local`. Revierte el `git rm --cached` de 2026-08-29.
-
 - 2026-08-29: Versionado. `package.json` de `0.1.0` a `0.2.0`, tag anotado `v0.2.0` y primera release del repo: https://github.com/memoriainfinita/sadhana/releases/tag/v0.2.0. En el README, badge de release dinamico (`shields.io/github/v/release`) en vez de un numero escrito a mano, para que no se desincronice del tag. No hace falta redeploy: ni el README ni `package.json` entran en el build, asi que `gh-pages` sigue sirviendo el bundle correcto de `48e4292`. Commit `7b5c7d9`.
+
+- 2026-09-24: `state.md` versionado otra vez, sin rutas locales ni el correo `.local`. Revierte el `git rm --cached` de 2026-08-29.
 
 ## TODO
 
