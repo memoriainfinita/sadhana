@@ -1,6 +1,6 @@
 ---
 created: 2026-05-09
-last_updated: 2026-09-24
+last_updated: 2026-09-25
 ---
 
 # Sadhana State
@@ -11,7 +11,7 @@ last_updated: 2026-09-24
 - Project: Sadhana, app audiovisual/musical para sesiones guiadas con audio, cues y memoria de practica.
 - Stack: React + Vite, pnpm, Git en rama `master`
 - Repo remoto: https://github.com/memoriainfinita/sadhana (publico, default branch `master`, desde 2026-06-26)
-- Sitio en vivo: https://memoriainfinita.github.io/sadhana/ (GitHub Pages, rama `gh-pages`, build legacy sin Actions)
+- Sitio en vivo: https://memoriainfinita.github.io/sadhana/ (GitHub Pages desplegado por GitHub Actions, `.github/workflows/pages.yml`: cada push a `master` instala con `--frozen-lockfile`, pasa los tests, construye y publica `dist/`. Si un test falla no se publica)
 
 ## Services
 
@@ -83,6 +83,8 @@ last_updated: 2026-09-24
 - 2026-08-29: Versionado. `package.json` de `0.1.0` a `0.2.0`, tag anotado `v0.2.0` y primera release del repo: https://github.com/memoriainfinita/sadhana/releases/tag/v0.2.0. En el README, badge de release dinamico (`shields.io/github/v/release`) en vez de un numero escrito a mano, para que no se desincronice del tag. No hace falta redeploy: ni el README ni `package.json` entran en el build, asi que `gh-pages` sigue sirviendo el bundle correcto de `48e4292`. Commit `7b5c7d9`.
 
 - 2026-09-24: `state.md` versionado otra vez, sin rutas locales ni el correo `.local`. Revierte el `git rm --cached` de 2026-08-29.
+
+- 2026-09-25: Despliegue de Pages pasado a GitHub Actions. Antes era manual: build local, rama huerfana `gh-pages` y `push -f`, y un push a `master` no actualizaba la web. Build verificado antes desde un clon limpio: `pnpm install --frozen-lockfile`, 123 tests verdes, `dist/` con los 52 mp3. La rama `gh-pages` se conserva en el remoto como rollback (`build_type=legacy`, fuente `gh-pages` /).
 
 ## TODO
 
