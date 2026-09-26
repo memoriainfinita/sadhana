@@ -8,7 +8,7 @@ Audiovisual/music app for guided sessions with audio, cues and practice history.
 
 **Live:** https://memoriainfinita.github.io/sadhana/
 
-![sadhana in Design mode: the session timeline with its cues and, on the right, the inspector for the selected cue](docs/sadhana-demo.png)
+![sadhana in Practice mode: a 24-minute session running, the countdown and the list of cues with the current one highlighted](docs/sadhana-demo.png)
 
 Three modes:
 
