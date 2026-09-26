@@ -1,7 +1,7 @@
 node_modules/
 dist/
 docs/*
-!docs/sadhana-demo.png
+!docs/sadhana-*.png
 .claude/
 openspec/
 .backups/

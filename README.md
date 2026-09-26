@@ -10,11 +10,23 @@ Audiovisual/music app for guided sessions with audio, cues and practice history.
 
 ![sadhana in Practice mode: a 24-minute session running, the countdown and the list of cues with the current one highlighted](docs/sadhana-demo.png)
 
-Three modes:
+## Modes
 
-- **Practice** — timer, cues and the active instruction.
-- **Design** — timeline with draggable cues, DAW-style fade clips, inspector.
-- **Remember** — presets and recent sessions.
+### Practice
+
+Timer, cues and the active instruction. The screenshot above shows this mode.
+
+### Design
+
+Timeline with draggable cues, DAW-style fade clips, inspector.
+
+![sadhana in Design mode: the session timeline with its cues and, on the right, the inspector for the selected cue](docs/sadhana-design.png)
+
+### Remember
+
+Presets and recent sessions.
+
+![sadhana in Remember mode: the twelve presets on the left and the latest sessions on the right](docs/sadhana-remember.png)
 
 ## Stack
 
